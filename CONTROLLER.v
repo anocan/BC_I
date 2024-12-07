@@ -51,9 +51,10 @@ always @(*) begin
     CLR_SC = 1'b0;
 
     // Clear the CTRL_SGNLS with 0s in each cycle
-    for (i = 0; i < CTRL_LNGTH; i = i + 1) begin
+    for (i = 0; i < CTRL_LNGTH-1; i = i + 1) begin
         CTRL_SGNLS[i] = 3'b000;
     end
+    CTRL_SGNLS[CTRL_LNGTH-1] = 3'b111;
 
     // FETCH
     case (1'b1)
@@ -88,6 +89,10 @@ always @(*) begin
                         CTRL_SGNLS[20] = 3'b011;
                     end
                     IR[8]: CTRL_SGNLS[18] = 1'b1; // E <- E'
+                    IR[7]: begin // AC <- {shl[AC], E}  
+                        CTRL_SGNLS[9] = 1'b1;
+                        CTRL_SGNLS[20] = 3'b100; 
+                    end
                     //default: 
                 endcase
             end

@@ -14,8 +14,8 @@ def printRegisters(dut):
     dut._log.info(f"IR: {dut.IR.value}")
     dut._log.info(f"AC: {dut.AC.value}")
     dut._log.info(f"DR: {dut.DR.value}")
-    #dut._log.info(f"OPSEL: {dut.data_path.OPSEL_ALU.value}")
-    #dut._log.info(f"CNTRL: {dut.w_CTRL_SGNLS.value[20]}")
+    dut._log.info(f"OPSEL: {dut.data_path.OPSEL_ALU.value}")
+    dut._log.info(f"CNTRL: {dut.w_CTRL_SGNLS.value[20]}")
     dut._log.info(f"E: {dut.data_path.e_ff.E.value}")
 
 
@@ -329,7 +329,7 @@ async def CME_test(dut):
     # Initialize values
     instruction = 28928 # CME
     address = 1876          # Address to write to
-    e_value = 0         # Initial AC to be complemented
+    e_value = 0         # Initial e to be complemented
     cmp_e_value = 1-e_value
     dut.data_path.memory.MEMORY[address].value = instruction
     dut.data_path.memory.MEMORY[address+1].value = instruction # 2 CME Instructions
@@ -371,6 +371,81 @@ async def CME_test(dut):
             case 8: 
                 dut._log.info(f"Cycle count: {cycle} ----------\n")
                 assert dut.data_path.e_ff.E.value == e_value, f"The E: {dut.data_path.e_ff.E.value} is not complemented to {e_value}"
+            ### ENDEXECUTE CLA
+
+            case _:
+                dut._log.info(f"Cycle count: {cycle} ----------\n")
+    
+    dut._log.info("BC I test ended successfully!")
+
+@cocotb.test()
+async def CIR_test(dut):
+    """Try accessing the design."""
+    # Initialize values
+    instruction = 28800 # CIR
+    address = 100          # Address to write to
+    ac_value = 1723         # Initial AC
+    e_value = 1
+    dut.data_path.memory.MEMORY[address].value = instruction
+    dut.data_path.memory.MEMORY[address+1].value = instruction # 2 CIR Instructions
+    dut.data_path.PC.A.value = address
+    dut.data_path.AC.A.value = ac_value
+    dut.data_path.e_ff.E.value = e_value # Initial E value 
+    flag = 1
+    
+
+    #Start the clock
+    await cocotb.start(Clock(dut.clk, 10, 'us').start(start_high=False))
+    clkedge = FallingEdge(dut.clk)
+
+    for cycle in range(12):
+        await clkedge
+
+        #Logging the values if debugging
+        if DEBUG:
+            printRegisters(dut)
+            pass
+            
+        match cycle:
+            case 0 | 1 | 2: ### FETCH
+                dut._log.info(f"Cycle count: {cycle} ----------\n")
+                assert dut.AC.value == ac_value, f"Read value {dut.AC.value} does not match the written AC value {ac_value}"
+                assert dut.data_path.e_ff.E.value == e_value, f"Cycle {cycle}: E mismatch. Expected {e_value}, got {dut.data_path.e_ff.E.value}"
+
+            ### ENDFETCH
+
+            case 3: ### EXECUTE CIR
+                dut._log.info(f"Cycle count: {cycle} ----------\n")
+                assert dut.AC.value == ac_value, f"Read value {dut.AC.value} does not match the written cir AC value {ac_value}" 
+                assert dut.data_path.e_ff.E.value == e_value, f"Cycle {cycle}: E mismatch. Expected {e_value}, got {dut.data_path.e_ff.E.value}"
+            ### ENDEXECUTE
+            
+            case 4 | 5 | 6: ### FETCH
+                if (flag):
+                    lsb = ac_value & 1  # Extract LSB of AC
+                    e_value = lsb  # Update E to LSB             
+                    ac_value = (ac_value >> 1) | (e_value << (dut.AC.value.n_bits - 1))  # Right shift AC with E as MSB
+                    flag = 0
+
+                dut._log.info(f"Cycle count: {cycle} ----------\n")
+                assert dut.AC.value == ac_value, f"Cycle {cycle}: AC mismatch. Expected {ac_value}, got {dut.AC.value}"
+                assert dut.data_path.e_ff.E.value == e_value, f"Cycle {cycle}: E mismatch. Expected {e_value}, got {dut.data_path.e_ff.E.value}"
+            ### ENDFETCH
+
+            case 7: ### EXECUTE CIR #2
+                dut._log.info(f"Cycle count: {cycle} ----------\n")
+                assert dut.AC.value == ac_value, f"Cycle {cycle}: AC mismatch. Expected {ac_value}, got {dut.AC.value}"
+                assert dut.data_path.e_ff.E.value == e_value, f"Cycle {cycle}: E mismatch. Expected {e_value}, got {dut.data_path.e_ff.E.value}"
+            
+            case 8:
+                lsb = ac_value & 1  # Extract LSB of AC
+                e_value = lsb  # Update E to LSB
+                ac_value = (ac_value >> 1) | (e_value << (dut.AC.value.n_bits - 1))  # Right shift AC with E as MSB
+                
+                dut._log.info(f"Cycle count: {cycle} ----------\n")
+                assert dut.AC.value == ac_value, f"Cycle {cycle}: AC mismatch. Expected {ac_value}, got {dut.AC.value}"
+                assert dut.data_path.e_ff.E.value == e_value, f"Cycle {cycle}: E mismatch. Expected {e_value}, got {dut.data_path.e_ff.E.value}"
+
             ### ENDEXECUTE CLA
 
             case _:

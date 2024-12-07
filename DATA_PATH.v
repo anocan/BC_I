@@ -22,6 +22,7 @@ wire [11:0] w_AR, w_PC;          // Address register outputs
 wire [WIDTH-1:0] w_ALU;   // ALU result
 wire [WIDTH-1:0] w_TR, w_IR;
 wire w_E;
+wire [1:0] w_CNTRL_E;
 
 assign PC_OUT = w_PC;
 assign AR_OUT = w_AR;
@@ -116,6 +117,7 @@ ALU alu(
 .AC(w_AC),
 .DR(w_DR),
 .RESULT(w_ALU),
+.CNTRL_E(w_CNTRL_E),
 .E(w_E),
 .OPSEL(OPSEL_ALU),
 .CO(),
@@ -126,6 +128,7 @@ ALU alu(
 
 E_FF e_ff(
 .clk(clk),
+.CNTRL_E(w_CNTRL_E),
 .LOAD(LD_E),           
 .CMP(CMP_E),       
 .RST(CLR_E),   
