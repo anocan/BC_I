@@ -63,6 +63,9 @@ testSPA:
 testSNA:
 	$(MAKE) sim TOPLEVEL=$(TOPLEVEL) MODULE=$(MODULE) TESTCASE=SNA_test
 
+testSZA:
+	$(MAKE) sim TOPLEVEL=$(TOPLEVEL) MODULE=$(MODULE) TESTCASE=SZA_test
+
 clear:
 	rm -rf sim_build results.xml *.vcd
 

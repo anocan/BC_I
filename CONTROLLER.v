@@ -99,10 +99,13 @@ always @(*) begin
                         CTRL_SGNLS[20] = 3'b101; 
                     end
                     IR[5]: CTRL_SGNLS[10] = 1'b1; //AC <- AC + 1
-                    IR[4]: if (~N) begin
+                    IR[4]: if (~N) begin // if (AC(15) === 0) then PC <- PC + 1
                         CTRL_SGNLS[4] = 1'b1; 
                     end
-                    IR[3]: if (N) begin
+                    IR[3]: if (N) begin // if (AC(15) === 1) then PC <- PC + 1
+                        CTRL_SGNLS[4] = 1'b1;
+                    end
+                    IR[2]: if (Z) begin // if (AC === 0) then PC <- PC + 1
                         CTRL_SGNLS[4] = 1'b1;
                     end
                     //default: 
