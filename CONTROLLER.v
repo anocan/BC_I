@@ -14,10 +14,11 @@ reg INR_SC, CLR_SC;
 reg [7:0] D;
 wire [15:0] T;
 wire [2:0] OPCODE = IR[14:12];
-reg I;
+reg I, S;
 
 initial begin
     INR_SC = 1'b0;
+    S = 1;
 end
 
 // DECODER
@@ -40,7 +41,8 @@ end
 SC sc(
 .clk(clk),          
 .CLR(CLR_SC),       
-.INR(INR_SC),    
+.INR(INR_SC),
+.S(S),    
 .T(T) 
 );
 
@@ -80,7 +82,7 @@ always @(*) begin
     // EXECUTE
         T[3]: begin
             // REGISTER REFERENCE (NO I/O OPERATION ASSUMED)
-            if (D[7]) begin // SC <- 0, 
+            if (D[7] && S) begin // SC <- 0, 
                 CLR_SC = 1;
                 case (1'b1)
                     IR[11]: CTRL_SGNLS[11] = 1'b1; // AC <- 0
@@ -111,6 +113,7 @@ always @(*) begin
                     IR[1]: if (~E_IN) begin // if (E === 0) then PC <- PC + 1
                         CTRL_SGNLS[4] = 1'b1;
                     end
+                    IR[0]: S = 0; // S <- 0
                     //default: 
                 endcase
             end

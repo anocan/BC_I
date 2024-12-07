@@ -732,3 +732,43 @@ async def SZE_test(dut):
                 dut._log.info(f"Cycle count: {cycle} ----------\n")
     
     dut._log.info("BC I test ended successfully!")
+
+@cocotb.test()
+async def HLT_test(dut):
+    """Try accessing the design."""
+    # Initialize values
+    instruction = 28673 # SZE
+    address = 1002          # Address to write to
+    dut.data_path.memory.MEMORY[address].value = instruction
+    dut.data_path.PC.A.value = address
+
+    #Start the clock
+    await cocotb.start(Clock(dut.clk, 10, 'us').start(start_high=False))
+    clkedge = FallingEdge(dut.clk)
+
+    for cycle in range(8):
+        await clkedge
+
+        #Logging the values if debugging
+        if DEBUG:
+            printRegisters(dut)
+            
+        match cycle:
+            case 0 | 1 | 2: ### FETCH
+                dut._log.info(f"Cycle count: {cycle} ----------\n")
+                #assert dut.data_path.AC.A.value == ac_value, f"Read value {dut.data_path.AC.A.value} does not match the written AC value {ac_value}"
+            ### ENDFETCH
+
+            case 3: ### EXECUTE HLT
+                dut._log.info(f"Cycle count: {cycle} ----------\n")
+                #assert dut.PC.value == address+1, f"Read value {dut.PC.value} does not match the value {address+1}"
+            
+            case 4 | 5 | 6 | 7: 
+                dut._log.info(f"Cycle count: {cycle} ----------\n")
+                assert dut.controller.T.value == 2**3, f"Read value {dut.controller.T.value} does not match the T = T3 value {2}"
+            ### ENDEXECUTE
+
+            case _:
+                dut._log.info(f"Cycle count: {cycle} ----------\n")
+    
+    dut._log.info("BC I test ended successfully!")

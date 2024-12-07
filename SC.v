@@ -1,7 +1,8 @@
 module SC(
     input clk,          
     input CLR,       
-    input INR,    
+    input INR,
+    input S,    
     output reg [15:0] T    
 );
 
@@ -14,10 +15,12 @@ initial begin
 end   
 
 always @(posedge clk) begin
-    if (CLR)
-        SQ <= 4'b0000;    
-    else if (INR)
-        SQ <= SQ + 1'b1;   
+    if (S) begin
+        if (CLR)
+            SQ <= 4'b0000;    
+        else if (INR)
+            SQ <= SQ + 1'b1;
+    end   
 end
 
 always @(*) begin

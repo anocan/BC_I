@@ -34,7 +34,6 @@ assign DR_OUT = w_DR;
 assign E_OUT = w_E;
 
 initial begin
-   
 end
 
 // Control Signals
