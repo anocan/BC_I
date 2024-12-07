@@ -48,6 +48,7 @@ integer i;
 always @(*) begin
     BUS_SEL = 3'b000;
     INR_SC = 1'b0;
+    CLR_SC = 1'b0;
 
     // Clear the CTRL_SGNLS with 0s in each cycle
     for (i = 0; i < CTRL_LNGTH; i = i + 1) begin
@@ -63,8 +64,8 @@ always @(*) begin
         end 
         T[1]: begin // IR <- M[AR], PC <- PC + 1
             BUS_SEL = 3'b110;
-            CTRL_SGNLS[12] = 1'b1;
             CTRL_SGNLS[4] = 1'b1;
+            CTRL_SGNLS[12] = 1'b1;
             INR_SC = 1'b1;
         end
         T[2]: begin //  D0, . . . , D7 <- Decode IR(14-12), AR <- IR(11-0), I <- IR(15)
@@ -86,7 +87,7 @@ always @(*) begin
                         CTRL_SGNLS[9]  = 1'b1;
                         CTRL_SGNLS[20] = 3'b011;
                     end
-
+                    IR[8]: CTRL_SGNLS[18] = 1'b1; // E <- E'
                     //default: 
                 endcase
             end

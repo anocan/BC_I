@@ -45,6 +45,9 @@ testCLE:
 testCMA:
 	$(MAKE) sim TOPLEVEL=$(TOPLEVEL) MODULE=$(MODULE) TESTCASE=CMA_test
 
+testCME:
+	$(MAKE) sim TOPLEVEL=$(TOPLEVEL) MODULE=$(MODULE) TESTCASE=CME_test
+
 clear:
 	rm -rf sim_build results.xml *.vcd
 
