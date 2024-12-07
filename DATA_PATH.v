@@ -5,7 +5,6 @@ module DATA_PATH #(
     input clk,             // Clock signal
     input [2:0] BUS_SEL,   // Bus select (3-bit)
     input [2:0] CTRL_SGNLS [0:CTRL_LNGTH-1],
-    input [15:0] WRD,
     output [11:0] PC_OUT,
     output [11:0] AR_OUT,
     output [WIDTH-1:0] IR_OUT,
@@ -98,7 +97,7 @@ assign MUX_ARRAY[3] = w_AC;          // Input 3: AC
 assign MUX_ARRAY[4] = w_IR;          // Input 4: IR
 assign MUX_ARRAY[5] = w_TR;          // Input 5: TR
 assign MUX_ARRAY[6] = w_MEM;         // Input 6: Memory Output
-assign MUX_ARRAY[7] = WRD;         // Input 7: Reserved (default 0)
+assign MUX_ARRAY[7] = 16'b0;         // Input 7: Reserved (default 0)
 
 // Instantiate memory
 mux8to1 bus_mux(

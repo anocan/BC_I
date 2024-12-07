@@ -19,22 +19,7 @@ reg I, S;
 initial begin
     INR_SC = 1'b0;
     S = 1;
-end
-
-// DECODER
-always @(*) begin
     D = 8'b0;
-    case (OPCODE)
-       3'b000:  D[0] = 1'b1;
-       3'b001:  D[1] = 1'b1;
-       3'b010:  D[2] = 1'b1;
-       3'b011:  D[3] = 1'b1;
-       3'b100:  D[4] = 1'b1;
-       3'b101:  D[5] = 1'b1;
-       3'b110:  D[6] = 1'b1;
-       3'b111:  D[7] = 1'b1;
-        default: D = 8'b0;
-    endcase
 end
 
 // SEQUENCE COUNTER
@@ -77,6 +62,19 @@ always @(*) begin
             CTRL_SGNLS[0] = 1'b1;
             I = IR[15];
             INR_SC = 1'b1;
+            // DECODE 
+            D = 8'b0; 
+            case (OPCODE)
+                3'b000:  D[0] = 1'b1;
+                3'b001:  D[1] = 1'b1;
+                3'b010:  D[2] = 1'b1;
+                3'b011:  D[3] = 1'b1;
+                3'b100:  D[4] = 1'b1;
+                3'b101:  D[5] = 1'b1;
+                3'b110:  D[6] = 1'b1;
+                3'b111:  D[7] = 1'b1;
+                    default: D = 8'b0;
+            endcase        
         end
         
     // EXECUTE
@@ -117,6 +115,35 @@ always @(*) begin
                     //default: 
                 endcase
             end
+            // MEMORY REFERENCE
+            else if (~D[7] && S) begin
+                INR_SC = 1'b1;
+                if (I) begin // INDIRECT AR <- M[AR]
+                    BUS_SEL = 3'b110;
+                    CTRL_SGNLS[0] = 1'b1;
+                end 
+            end
+        end
+        T[4]: begin
+            case (1'b1)
+                D[0]: begin // AND: DR <- M[AR]
+                    INR_SC = 1'b1;
+                    BUS_SEL = 3'b110;
+                    CTRL_SGNLS[6] = 1'b1;
+                end 
+                //default: 
+            endcase
+        end
+        T[5]: begin
+            case (1'b1)
+                D[0]: begin // AND: AC <- AC ∧ DR, SC <- 0
+                    CLR_SC = 1'b1;
+                    BUS_SEL = 3'b110;
+                    CTRL_SGNLS[9] = 1'b1;
+                    CTRL_SGNLS[20] = 3'b001;
+                end 
+                //default: 
+            endcase            
         end
 
         //default: 

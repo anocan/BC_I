@@ -11,8 +11,6 @@ module BC_I #(
     output [15:0] AC,
     output [15:0] DR
 );
- 
-wire [15:0] w_WRD;
 
 wire [2:0] w_BUS_SEL;
 wire [2:0] w_CTRL_SGNLS [0:CTRL_LNGTH-1];
@@ -43,8 +41,7 @@ DATA_PATH data_path(
 .Z(w_Z),
 .N(w_N),
 .OVF(w_OVF),
-.E_OUT(w_EFF),
-.WRD(w_WRD)   
+.E_OUT(w_EFF)
 );
 
 CONTROLLER controller(

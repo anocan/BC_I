@@ -36,6 +36,7 @@ test3:
 test4:
 	$(MAKE) sim TOPLEVEL=$(TOPLEVEL) MODULE=$(MODULE) TESTCASE=controller_test
 
+# Register Reference Instructions
 testCLA:
 	$(MAKE) sim TOPLEVEL=$(TOPLEVEL) MODULE=$(MODULE) TESTCASE=CLA_test
 
@@ -71,6 +72,10 @@ testSZE:
 
 testHLT:
 	$(MAKE) sim TOPLEVEL=$(TOPLEVEL) MODULE=$(MODULE) TESTCASE=HLT_test
+
+# Memory Reference Instructions
+testAND:
+	$(MAKE) sim TOPLEVEL=$(TOPLEVEL) MODULE=$(MODULE) TESTCASE=AND_test
 
 clear:
 	rm -rf sim_build results.xml *.vcd

@@ -14,11 +14,12 @@ def printRegisters(dut):
     dut._log.info(f"IR: {dut.IR.value}")
     dut._log.info(f"AC: {dut.AC.value}")
     dut._log.info(f"DR: {dut.DR.value}")
-    dut._log.info(f"OPSEL: {dut.data_path.OPSEL_ALU.value}")
-    dut._log.info(f"CNTRL: {dut.w_CTRL_SGNLS.value[4]}")
+    #dut._log.info(f"D: {dut.controller.D.value}")
+    #dut._log.info(f"OPSEL: {dut.data_path.OPSEL_ALU.value}")
+    #dut._log.info(f"CNTRL: {dut.w_CTRL_SGNLS.value[4]}")
     #dut._log.info(f"E: {dut.data_path.e_ff.E.value}")
     #dut._log.info(f"N: {dut.controller.N.value}")
-    dut._log.info(f"Z: {dut.controller.Z.value}")
+    #dut._log.info(f"Z: {dut.controller.Z.value}")
 
 
 @cocotb.test()
@@ -767,6 +768,72 @@ async def HLT_test(dut):
                 dut._log.info(f"Cycle count: {cycle} ----------\n")
                 assert dut.controller.T.value == 2**3, f"Read value {dut.controller.T.value} does not match the T = T3 value {2}"
             ### ENDEXECUTE
+
+            case _:
+                dut._log.info(f"Cycle count: {cycle} ----------\n")
+    
+    dut._log.info("BC I test ended successfully!")
+
+@cocotb.test()
+async def AND_test(dut):
+    """Try accessing the design."""
+    # --- Test Setup ---
+    instruction_direct = 0b0000000000000100  # AND with direct addressing mode
+    instruction_indirect = 0b1000000000000100  # AND with indirect addressing mode
+    target_address = 4  # Memory address to perform AND
+    memory_value = 0b1010101010101010  # Value in memory to AND with
+    memory_value_2 = 0b1110100011101011
+    ac_initial_value = 0b1100110011001100  # Initial AC value
+    expected_result_direct = ac_initial_value & memory_value
+    expected_result_indirect = expected_result_direct & memory_value_2
+
+    # Direct addressing mode setup
+    dut.data_path.memory.MEMORY[target_address].value = memory_value  # Set memory value
+    dut.data_path.memory.MEMORY[1002].value = instruction_direct  # Load instruction in memory
+    dut.data_path.memory.MEMORY[1003].value = instruction_indirect  # Load instruction in memory
+    dut.data_path.memory.MEMORY[2730].value = memory_value_2  # Load instruction in memory
+    dut.data_path.AC.A.value = ac_initial_value  # Initialize AC
+    dut.data_path.PC.A.value = 1002  # Set PC to instruction address
+
+    #Start the clock
+    await cocotb.start(Clock(dut.clk, 10, 'us').start(start_high=False))
+    clkedge = FallingEdge(dut.clk)
+
+    for cycle in range(14):
+        await clkedge
+
+        #Logging the values if debugging
+        if DEBUG:
+            printRegisters(dut)
+            
+        match cycle:
+            case 0 | 1 | 2: ### FETCH
+                dut._log.info(f"Cycle count: {cycle} ----------\n")
+            ### ENDFETCH
+
+            case 4: ### EXECUTE AND
+                dut._log.info(f"Cycle count: {cycle} ----------\n")
+            
+            case 5: 
+                dut._log.info(f"Cycle count: {cycle} ----------\n")
+                assert dut.DR.value == memory_value, f"Read value {dut.DR.value} does not match the expected value {memory_value}"
+            ### ENDEXECUTE #1
+            case 6 | 7 | 8:  ### FETCH #2
+                dut._log.info(f"Cycle count: {cycle} ----------\n")
+                assert dut.AC.value == expected_result_direct, f"Read value {dut.DR.value} does not match the expected value {expected_result_direct}"
+            ### ENDFETCH #2
+
+            case 9: ### INDIRECT
+                dut._log.info(f"Cycle count: {cycle} ----------\n")            
+            case 10: ### EXECUTE AND #2
+                dut._log.info(f"Cycle count: {cycle} ----------\n")
+            case 11:
+                dut._log.info(f"Cycle count: {cycle} ----------\n")
+                assert dut.DR.value == memory_value_2, f"Read value {dut.DR.value} does not match the expected value {memory_value_2}"
+            case 12:
+                dut._log.info(f"Cycle count: {cycle} ----------\n")
+                assert dut.AC.value == expected_result_indirect, f"Read value {dut.DR.value} does not match the expected value {expected_result_indirect}"
+            ### ENDEXECUTE #2
 
             case _:
                 dut._log.info(f"Cycle count: {cycle} ----------\n")
