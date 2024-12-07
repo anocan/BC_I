@@ -102,6 +102,9 @@ always @(*) begin
                     IR[4]: if (~N) begin
                         CTRL_SGNLS[4] = 1'b1; 
                     end
+                    IR[3]: if (N) begin
+                        CTRL_SGNLS[4] = 1'b1;
+                    end
                     //default: 
                 endcase
             end

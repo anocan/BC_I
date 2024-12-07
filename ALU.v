@@ -14,7 +14,6 @@ module ALU #(
 );
 
 initial begin
-    RESULT = 0;
     CO = 0;
     OVF = 0;
 end
