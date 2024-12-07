@@ -97,6 +97,7 @@ always @(*) begin
                         CTRL_SGNLS[9] = 1'b1;
                         CTRL_SGNLS[20] = 3'b101; 
                     end
+                    IR[5]: CTRL_SGNLS[10] = 1'b1;
                     //default: 
                 endcase
             end

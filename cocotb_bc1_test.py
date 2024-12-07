@@ -520,3 +520,45 @@ async def CIL_test(dut):
             case _:  # Default for unused cycles
                 dut._log.info(f"Cycle count: {cycle}: No specific operation.")
     dut._log.info("BC I test ended successfully!")
+
+@cocotb.test()
+async def INC_test(dut):
+    """Try accessing the design."""
+    # Initialize values
+    instruction = 28704 # CMA
+    address = 1002          # Address to write to
+    ac_value = 876         # Initial AC to be complemented
+    dut.data_path.memory.MEMORY[address].value = instruction
+    dut.data_path.PC.A.value = address
+    dut.data_path.AC.A.value = ac_value
+
+    #Start the clock
+    await cocotb.start(Clock(dut.clk, 10, 'us').start(start_high=False))
+    clkedge = FallingEdge(dut.clk)
+
+    for cycle in range(8):
+        await clkedge
+
+        #Logging the values if debugging
+        if DEBUG:
+            printRegisters(dut)
+            
+        match cycle:
+            case 0 | 1 | 2: ### FETCH
+                dut._log.info(f"Cycle count: {cycle} ----------\n")
+                assert dut.data_path.AC.A.value == ac_value, f"Read value {dut.data_path.AC.A.value} does not match the written AC value {ac_value}"
+            ### ENDFETCH
+
+            case 3: ### EXECUTE CMA
+                dut._log.info(f"Cycle count: {cycle} ----------\n")
+                assert dut.data_path.AC.A.value == ac_value, f"Read value {dut.data_path.AC.A.value} does not match the written AC value {ac_value}"
+            
+            case 4: 
+                dut._log.info(f"Cycle count: {cycle} ----------\n")
+                assert dut.data_path.AC.A.value == ac_value+1, f"The AC: {dut.data_path.AC.A.value} is not incremented to {ac_value+1}"
+            ### ENDEXECUTE
+
+            case _:
+                dut._log.info(f"Cycle count: {cycle} ----------\n")
+    
+    dut._log.info("BC I test ended successfully!")
