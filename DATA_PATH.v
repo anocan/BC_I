@@ -1,11 +1,16 @@
 module DATA_PATH #(
-    parameter WIDTH=16)
+    parameter WIDTH=16,
+    parameter CTRL_LNGTH = 20)
 (
     input clk,             // Clock signal
     input [2:0] BUS_SEL,   // Bus select (3-bit)
-    input WE_MEM,          // Memory write enable
-    input [WIDTH-1:0] CTRL_SGNLS,
-    input [15:0] WRD   // Write data (to memory)
+    input [CTRL_LNGTH-1:0] CTRL_SGNLS,
+    input [15:0] WRD,
+    output [WIDTH-1:0] PC_OUT,
+    output [WIDTH-1:0] AR_OUT,
+    output [WIDTH-1:0] IR_OUT,
+    output [WIDTH-1:0] AC_OUT,
+    output [WIDTH-1:0] DR_OUT
 );
 
 wire [WIDTH-1:0] MUX_ARRAY [0:7]; // Array of 8 inputs, each 16-bit wide
@@ -17,6 +22,12 @@ wire [11:0] w_AR, w_PC;          // Address register outputs
 wire [WIDTH-1:0] w_ALU;   // ALU result
 wire [WIDTH-1:0] w_TR, w_IR;
 wire w_E;
+
+assign PC_OUT = w_PC;
+assign AR_OUT = w_AR;
+assign IR_OUT = w_IR;
+assign AC_OUT = w_AC;
+assign DR_OUT = w_DR;
 
 initial begin
    
@@ -38,7 +49,26 @@ CLR_AC,     // CTRL_SGNLS[11]
 LD_IR,      // CTRL_SGNLS[12]
 LD_TR,      // CTRL_SGNLS[13]
 INR_TR,     // CTRL_SGNLS[14]
-CLR_TR;     // CTRL_SGNLS[15]
+CLR_TR,     // CTRL_SGNLS[15]
+MEM_WE;     // CTRL_SGNLS[16]
+
+assign LD_AR = CTRL_SGNLS[0];
+assign INR_AR = CTRL_SGNLS[1];
+assign CLR_AR = CTRL_SGNLS[2];
+assign LD_PC = CTRL_SGNLS[3];
+assign INR_PC = CTRL_SGNLS[4];
+assign CLR_PC = CTRL_SGNLS[5];
+assign LD_DR = CTRL_SGNLS[6];
+assign INR_DR = CTRL_SGNLS[7];
+assign CLR_DR = CTRL_SGNLS[8];
+assign LD_AC = CTRL_SGNLS[9];
+assign INR_AC = CTRL_SGNLS[10];
+assign CLR_AC = CTRL_SGNLS[11];
+assign LD_IR = CTRL_SGNLS[12];
+assign LD_TR = CTRL_SGNLS[13];
+assign LD_AR = CTRL_SGNLS[14];
+assign INR_TR = CTRL_SGNLS[15];
+assign MEM_WE = CTRL_SGNLS[16];
 
 // Instantiate registers
 RwLRI #(.WIDTH(12)) AR (.clk(clk), .WE(LD_AR), .INC(INR_AR), .RST(CLR_AR), .DATA(BUS[11:0]), .A(w_AR));

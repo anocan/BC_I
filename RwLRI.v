@@ -9,6 +9,10 @@ module RwLRI #(
     output reg [WIDTH-1:0] A // Register output        
 );
 
+initial begin
+    A = 0;
+end
+
 always @(posedge clk) begin
     if (RST) begin
         A <= 1'b0;

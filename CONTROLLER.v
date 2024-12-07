@@ -1,15 +1,16 @@
 module CONTROLLER #(
-    parameter WIDTH=16)
+    parameter WIDTH=16,
+    parameter CTRL_LNGTH = 20)
 (  
     input clk,
     input [15:0] IR,
     output reg [2:0] BUS_SEL, 
-    output reg [WIDTH-1:0] CTRL_SGNLS
+    output reg [CTRL_LNGTH-1:0] CTRL_SGNLS
 );
 
-wire INR_SC, CLR_SC;
+reg INR_SC, CLR_SC;
 
-wire [7:0] D;
+reg [7:0] D;
 wire [15:0] T;
 wire [2:0] OPCODE = IR[14:12];
 reg I;
@@ -48,7 +49,7 @@ SC sc(
 always @(*) begin
     BUS_SEL = 3'b000;
     CTRL_SGNLS = 16'b0;
-    INR = 1'b0;
+    INR_SC = 1'b0;
 
     case (1'b1)
         T[0]: begin // AR <- PC
@@ -68,7 +69,7 @@ always @(*) begin
             I = IR[15];
             INR_SC = 1'b1;
         end
-        default: 
+        //default: 
 endcase
     
 end

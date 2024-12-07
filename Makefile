@@ -17,7 +17,7 @@ VERILOG_SOURCES += $(PWD)/CONTROLLER.v
 
 # TOPLEVEL is the name of the toplevel module in your Verilog or VHDL file
 #Should be the name of the basic computer module for you
-TOPLEVEL = DATA_PATH #BC_I
+TOPLEVEL = BC_I #BC_I
 
 # MODULE is the basename of the Python test file
 #Name of your python file
@@ -32,6 +32,9 @@ test2:
 
 test3:
 	$(MAKE) sim TOPLEVEL=$(TOPLEVEL) MODULE=$(MODULE) TESTCASE=data_path_test
+
+test4:
+	$(MAKE) sim TOPLEVEL=$(TOPLEVEL) MODULE=$(MODULE) TESTCASE=controller_test
 
 clear:
 	rm -rf sim_build results.xml *.vcd

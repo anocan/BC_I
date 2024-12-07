@@ -155,3 +155,32 @@ async def data_path_test(dut):
     
     
     dut._log.info("BC I test ended successfully!")
+
+@cocotb.test()
+async def controller_test(dut):
+    """Try accessing the design."""
+    # Initialize values
+    address = 193          # Address to write to
+    value_to_write = 31    # Value to write
+
+    #Start the clock
+    await cocotb.start(Clock(dut.clk, 10, 'us').start(start_high=False))
+    #Get the fallin edge to work with
+    clkedge = FallingEdge(dut.clk)
+    
+    await clkedge
+    # Write operation
+    dut._log.info("Starting Write Operation")
+    dut.w_WRD.value = address 
+    dut._log.info(dut.PC.value)
+    await clkedge  # Wait for one clock cycle to latch address and data
+    dut._log.info(dut.PC.value)
+    await clkedge
+    dut._log.info(dut.PC.value)
+
+    # Assert the result
+    assert dut.w_WRD.value == value_to_write, f"Read value {dut.w_WRD.value} does not match written value {value_to_write}"
+    dut._log.info(f"Read-Back Successful: Address={address}, Value={dut.w_WRD.value}")
+    
+    
+    dut._log.info("BC I test ended successfully!")
