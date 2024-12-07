@@ -1,11 +1,11 @@
 module CONTROLLER #(
     parameter WIDTH=16,
-    parameter CTRL_LNGTH = 20)
+    parameter CTRL_LNGTH = 21)
 (  
     input clk,
     input [15:0] IR,
     output reg [2:0] BUS_SEL, 
-    output reg [CTRL_LNGTH-1:0] CTRL_SGNLS
+    output reg [2:0] CTRL_SGNLS [0:CTRL_LNGTH-1]
 );
 
 reg INR_SC, CLR_SC;
@@ -44,11 +44,15 @@ SC sc(
 );
 
 // COMBINATONAL CONTROL LOGICS
-
+integer i;
 always @(*) begin
     BUS_SEL = 3'b000;
-    CTRL_SGNLS = 16'b0;
     INR_SC = 1'b0;
+
+    // Clear the CTRL_SGNLS with 0s in each cycle
+    for (i = 0; i < CTRL_LNGTH; i = i + 1) begin
+        CTRL_SGNLS[i] = 3'b000;
+    end
 
     // FETCH
     case (1'b1)
@@ -74,10 +78,13 @@ always @(*) begin
         T[3]: begin
             // REGISTER REFERENCE (NO I/O OPERATION ASSUMED)
             if (D[7]) begin // SC <- 0, 
-                CLR_SC = 0;
+                CLR_SC = 1;
                 case (1'b1)
-                    IR[11]: begin
-                        CTRL_SGNLS[11] = 1'b1;
+                    IR[11]: CTRL_SGNLS[11] = 1'b1; // AC <- 0
+                    IR[10]: CTRL_SGNLS[19] = 1'b1; // E <- 0
+                    IR[9]: begin // AC <- AC'
+                        CTRL_SGNLS[9]  = 1'b1;
+                        CTRL_SGNLS[20] = 3'b011;
                     end
 
                     //default: 

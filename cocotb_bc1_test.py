@@ -14,6 +14,8 @@ def printRegisters(dut):
     dut._log.info(f"IR: {dut.IR.value}")
     dut._log.info(f"AC: {dut.AC.value}")
     dut._log.info(f"DR: {dut.DR.value}")
+    #dut._log.info(f"OPSEL: {dut.data_path.OPSEL_ALU.value}")
+    #dut._log.info(f"CNTRL: {dut.w_CTRL_SGNLS.value[20]}")
 
 
 @cocotb.test()
@@ -226,7 +228,93 @@ async def CLA_test(dut):
             case 4: 
                 dut._log.info(f"Cycle count: {cycle} ----------\n")
                 assert dut.AC.value == 0, f"The AC: {dut.AC.value} is not cleared"
-                dut._log.info(f"Read-Back Successful: Address={address}, Value={dut.w_WRD.value}")
+            ### ENDEXECUTE CLA
+
+            case _:
+                dut._log.info(f"Cycle count: {cycle} ----------\n")
+    
+    dut._log.info("BC I test ended successfully!")
+
+@cocotb.test()
+async def CLE_test(dut):
+    """Try accessing the design."""
+    # Initialize values
+    instruction = 29696 # CLE
+    address = 193          # Address to write to
+    e_value = 1         # Initial E to be cleared by CLA 
+    dut.data_path.memory.MEMORY[address].value = instruction
+    dut.data_path.PC.A.value = address
+    dut.data_path.e_ff.E.value = e_value
+
+    #Start the clock
+    await cocotb.start(Clock(dut.clk, 10, 'us').start(start_high=False))
+    clkedge = FallingEdge(dut.clk)
+
+    for cycle in range(8):
+        await clkedge
+
+        #Logging the values if debugging
+        if DEBUG:
+            printRegisters(dut)
+            pass
+            
+        match cycle:
+            case 0 | 1 | 2: ### FETCH
+                dut._log.info(f"Cycle count: {cycle} ----------\n")
+                assert dut.data_path.e_ff.E.value == e_value, f"Read value {dut.data_path.e_ff.E.value} does not match the E value {e_value}"
+            ### ENDFETCH
+
+            case 3: ### EXECUTE CLA
+                dut._log.info(f"Cycle count: {cycle} ----------\n")
+                assert dut.data_path.e_ff.E.value == e_value, f"Read value {dut.data_path.e_ff.E.value} does not match the written E value {e_value}"
+            
+            case 4: 
+                dut._log.info(f"Cycle count: {cycle} ----------\n")
+                assert dut.data_path.e_ff.E.value == 0, f"The E: {dut.data_path.e_ff.E.value} is not cleared"
+            ### ENDEXECUTE CLA
+
+            case _:
+                dut._log.info(f"Cycle count: {cycle} ----------\n")
+    
+    dut._log.info("BC I test ended successfully!")
+
+@cocotb.test()
+async def CMA_test(dut):
+    """Try accessing the design."""
+    # Initialize values
+    instruction = 29184 # CMA
+    address = 1002          # Address to write to
+    ac_value = 876         # Initial AC to be complemented
+    cmp_ac_value = 2**16-1-ac_value
+    dut.data_path.memory.MEMORY[address].value = instruction
+    dut.data_path.PC.A.value = address
+    dut.data_path.AC.A.value = ac_value
+
+    #Start the clock
+    await cocotb.start(Clock(dut.clk, 10, 'us').start(start_high=False))
+    clkedge = FallingEdge(dut.clk)
+
+    for cycle in range(8):
+        await clkedge
+
+        #Logging the values if debugging
+        if DEBUG:
+            printRegisters(dut)
+            pass
+            
+        match cycle:
+            case 0 | 1 | 2: ### FETCH
+                dut._log.info(f"Cycle count: {cycle} ----------\n")
+                assert dut.data_path.AC.A.value == ac_value, f"Read value {dut.data_path.AC.A.value} does not match the written AC value {ac_value}"
+            ### ENDFETCH
+
+            case 3: ### EXECUTE CLA
+                dut._log.info(f"Cycle count: {cycle} ----------\n")
+                assert dut.data_path.AC.A.value == ac_value, f"Read value {dut.data_path.AC.A.value} does not match the written AC value {ac_value}"
+            
+            case 4: 
+                dut._log.info(f"Cycle count: {cycle} ----------\n")
+                assert dut.data_path.AC.A.value == cmp_ac_value, f"The AC: {dut.data_path.AC.A.value} is not complemented to {cmp_ac_value}"
             ### ENDEXECUTE CLA
 
             case _:

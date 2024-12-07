@@ -1,7 +1,7 @@
 //Don't change the module I/O
 module BC_I #(
     parameter WIDTH=16,
-    parameter CTRL_LNGTH = 20)
+    parameter CTRL_LNGTH = 21)
 (
     input clk,
     input FGI,
@@ -15,7 +15,7 @@ module BC_I #(
 wire [15:0] w_WRD;
 
 wire [2:0] w_BUS_SEL;
-wire [CTRL_LNGTH-1:0] w_CTRL_SGNLS;
+wire [2:0] w_CTRL_SGNLS [0:CTRL_LNGTH-1];
 wire [WIDTH-1:0] w_IR, w_DR, w_AC;
 wire [11:0] w_AR, w_PC;
 

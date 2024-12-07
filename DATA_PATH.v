@@ -1,10 +1,10 @@
 module DATA_PATH #(
     parameter WIDTH=16,
-    parameter CTRL_LNGTH = 20)
+    parameter CTRL_LNGTH = 21)
 (
     input clk,             // Clock signal
     input [2:0] BUS_SEL,   // Bus select (3-bit)
-    input [CTRL_LNGTH-1:0] CTRL_SGNLS,
+    input [2:0] CTRL_SGNLS [0:CTRL_LNGTH-1],
     input [15:0] WRD,
     output [11:0] PC_OUT,
     output [11:0] AR_OUT,
@@ -50,25 +50,34 @@ LD_IR,      // CTRL_SGNLS[12]
 LD_TR,      // CTRL_SGNLS[13]
 INR_TR,     // CTRL_SGNLS[14]
 CLR_TR,     // CTRL_SGNLS[15]
-MEM_WE;     // CTRL_SGNLS[16]
+MEM_WE,     // CTRL_SGNLS[16]
+LD_E,       // CTRL_SGNLS[17]
+CMP_E,      // CTRL_SGNLS[18]
+CLR_E;      // CTRL_SGNLS[19]
+wire [2:0] OPSEL_ALU;  // CTRL_SGNLS[20]
 
-assign LD_AR = CTRL_SGNLS[0];
-assign INR_AR = CTRL_SGNLS[1];
-assign CLR_AR = CTRL_SGNLS[2];
-assign LD_PC = CTRL_SGNLS[3];
-assign INR_PC = CTRL_SGNLS[4];
-assign CLR_PC = CTRL_SGNLS[5];
-assign LD_DR = CTRL_SGNLS[6];
-assign INR_DR = CTRL_SGNLS[7];
-assign CLR_DR = CTRL_SGNLS[8];
-assign LD_AC = CTRL_SGNLS[9];
-assign INR_AC = CTRL_SGNLS[10];
-assign CLR_AC = CTRL_SGNLS[11];
-assign LD_IR = CTRL_SGNLS[12];
-assign LD_TR = CTRL_SGNLS[13];
-assign INR_TR = CTRL_SGNLS[14];
-assign CLR_TR = CTRL_SGNLS[15];
-assign MEM_WE = CTRL_SGNLS[16];
+assign LD_AR      = CTRL_SGNLS[0];
+assign INR_AR     = CTRL_SGNLS[1];
+assign CLR_AR     = CTRL_SGNLS[2];
+assign LD_PC      = CTRL_SGNLS[3];
+assign INR_PC     = CTRL_SGNLS[4];
+assign CLR_PC     = CTRL_SGNLS[5];
+assign LD_DR      = CTRL_SGNLS[6];
+assign INR_DR     = CTRL_SGNLS[7];
+assign CLR_DR     = CTRL_SGNLS[8];
+assign LD_AC      = CTRL_SGNLS[9];
+assign INR_AC     = CTRL_SGNLS[10];
+assign CLR_AC     = CTRL_SGNLS[11];
+assign LD_IR      = CTRL_SGNLS[12];
+assign LD_TR      = CTRL_SGNLS[13];
+assign INR_TR     = CTRL_SGNLS[14];
+assign CLR_TR     = CTRL_SGNLS[15];
+assign MEM_WE     = CTRL_SGNLS[16];
+assign LD_E       = CTRL_SGNLS[17];
+assign CMP_E      = CTRL_SGNLS[18];
+assign CLR_E      = CTRL_SGNLS[19];
+assign OPSEL_ALU  = CTRL_SGNLS[20];   
+
 
 // Instantiate registers
 RwLRI #(.WIDTH(12)) AR (.clk(clk), .WE(LD_AR), .INC(INR_AR), .RST(CLR_AR), .DATA(BUS[11:0]), .A(w_AR));
@@ -108,7 +117,7 @@ ALU alu(
 .DR(w_DR),
 .RESULT(w_ALU),
 .E(w_E),
-.OPSEL(),
+.OPSEL(OPSEL_ALU),
 .CO(),
 .Z(),
 .N(),
@@ -117,9 +126,9 @@ ALU alu(
 
 E_FF e_ff(
 .clk(clk),
-.LOAD(),           
-.CMP(),       
-.RST(),   
+.LOAD(LD_E),           
+.CMP(CMP_E),       
+.RST(CLR_E),   
 .E(w_E)  
 );
 
