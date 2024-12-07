@@ -51,6 +51,9 @@ testCME:
 testCIR:
 	$(MAKE) sim TOPLEVEL=$(TOPLEVEL) MODULE=$(MODULE) TESTCASE=CIR_test
 
+testCIL:
+	$(MAKE) sim TOPLEVEL=$(TOPLEVEL) MODULE=$(MODULE) TESTCASE=CIL_test
+
 clear:
 	rm -rf sim_build results.xml *.vcd
 

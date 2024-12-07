@@ -93,6 +93,10 @@ always @(*) begin
                         CTRL_SGNLS[9] = 1'b1;
                         CTRL_SGNLS[20] = 3'b100; 
                     end
+                    IR[6]: begin // AC <- {E, shl[AC]}  
+                        CTRL_SGNLS[9] = 1'b1;
+                        CTRL_SGNLS[20] = 3'b101; 
+                    end
                     //default: 
                 endcase
             end
