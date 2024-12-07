@@ -690,3 +690,45 @@ async def SZA_test(dut):
                 dut._log.info(f"Cycle count: {cycle} ----------\n")
     
     dut._log.info("BC I test ended successfully!")
+
+@cocotb.test()
+async def SZE_test(dut):
+    """Try accessing the design."""
+    # Initialize values
+    instruction = 28674 # SZE
+    address = 1002          # Address to write to
+    e_value = 0         # Initial E
+    dut.data_path.memory.MEMORY[address].value = instruction
+    dut.data_path.PC.A.value = address
+    dut.data_path.e_ff.E.value = e_value
+
+    #Start the clock
+    await cocotb.start(Clock(dut.clk, 10, 'us').start(start_high=False))
+    clkedge = FallingEdge(dut.clk)
+
+    for cycle in range(8):
+        await clkedge
+
+        #Logging the values if debugging
+        if DEBUG:
+            printRegisters(dut)
+            
+        match cycle:
+            case 0 | 1 | 2: ### FETCH
+                dut._log.info(f"Cycle count: {cycle} ----------\n")
+                #assert dut.data_path.AC.A.value == ac_value, f"Read value {dut.data_path.AC.A.value} does not match the written AC value {ac_value}"
+            ### ENDFETCH
+
+            case 3: ### EXECUTE SNA
+                dut._log.info(f"Cycle count: {cycle} ----------\n")
+                assert dut.PC.value == address+1, f"Read value {dut.PC.value} does not match the PC+1 value {address+1}"
+            
+            case 4: 
+                dut._log.info(f"Cycle count: {cycle} ----------\n")
+                assert dut.PC.value == address+2, f"Read value {dut.PC.value} does not match the PC+2 value {address+2}"
+            ### ENDEXECUTE
+
+            case _:
+                dut._log.info(f"Cycle count: {cycle} ----------\n")
+    
+    dut._log.info("BC I test ended successfully!")

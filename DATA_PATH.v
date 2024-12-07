@@ -11,7 +11,7 @@ module DATA_PATH #(
     output [WIDTH-1:0] IR_OUT,
     output [WIDTH-1:0] AC_OUT,
     output [WIDTH-1:0] DR_OUT,
-    output CO, output Z, output N, output OVF
+    output CO, Z, N, OVF, E_OUT
 );
 
 wire [WIDTH-1:0] MUX_ARRAY [0:7]; // Array of 8 inputs, each 16-bit wide
@@ -30,6 +30,8 @@ assign AR_OUT = w_AR;
 assign IR_OUT = w_IR;
 assign AC_OUT = w_AC;
 assign DR_OUT = w_DR;
+
+assign E_OUT = w_E;
 
 initial begin
    

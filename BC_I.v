@@ -19,7 +19,7 @@ wire [2:0] w_CTRL_SGNLS [0:CTRL_LNGTH-1];
 wire [WIDTH-1:0] w_IR, w_DR, w_AC;
 wire [11:0] w_AR, w_PC;
 
-wire w_CO, w_Z, w_N, w_OVF;
+wire w_CO, w_Z, w_N, w_OVF, w_EFF;
 
 initial begin
 end
@@ -43,6 +43,7 @@ DATA_PATH data_path(
 .Z(w_Z),
 .N(w_N),
 .OVF(w_OVF),
+.E_OUT(w_EFF),
 .WRD(w_WRD)   
 );
 
@@ -53,7 +54,8 @@ CONTROLLER controller(
 .CO(w_CO),
 .Z(w_Z),
 .N(w_N),
-.OVF(w_OVF), 
+.OVF(w_OVF),
+.E_IN(w_EFF), 
 .CTRL_SGNLS(w_CTRL_SGNLS)
 );
 
