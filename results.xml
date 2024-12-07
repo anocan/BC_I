@@ -1,8 +1,6 @@
 <testsuites name="results">
   <testsuite name="all" package="all">
-    <property name="random_seed" value="1733563486" />
-    <testcase name="controller_test" classname="cocotb_bc1_test" file="/Users/anilbudak/VSCode/445/HW1/cocotb_bc1_test.py" lineno="159" time="0.04269218444824219" sim_time_ns="20000.001" ratio_time="468469.844269669">
-      <failure message="Test failed with RANDOM_SEED=1733563486" />
-    </testcase>
+    <property name="random_seed" value="1733572497" />
+    <testcase name="CLA_test" classname="cocotb_bc1_test" file="/Users/anilbudak/VSCode/445/HW1/cocotb_bc1_test.py" lineno="193" time="0.043894052505493164" sim_time_ns="70000.001" ratio_time="1594749.1061856225" />
   </testsuite>
 </testsuites>

@@ -6,8 +6,8 @@ module DATA_PATH #(
     input [2:0] BUS_SEL,   // Bus select (3-bit)
     input [CTRL_LNGTH-1:0] CTRL_SGNLS,
     input [15:0] WRD,
-    output [WIDTH-1:0] PC_OUT,
-    output [WIDTH-1:0] AR_OUT,
+    output [11:0] PC_OUT,
+    output [11:0] AR_OUT,
     output [WIDTH-1:0] IR_OUT,
     output [WIDTH-1:0] AC_OUT,
     output [WIDTH-1:0] DR_OUT
@@ -66,8 +66,8 @@ assign INR_AC = CTRL_SGNLS[10];
 assign CLR_AC = CTRL_SGNLS[11];
 assign LD_IR = CTRL_SGNLS[12];
 assign LD_TR = CTRL_SGNLS[13];
-assign LD_AR = CTRL_SGNLS[14];
-assign INR_TR = CTRL_SGNLS[15];
+assign INR_TR = CTRL_SGNLS[14];
+assign CLR_TR = CTRL_SGNLS[15];
 assign MEM_WE = CTRL_SGNLS[16];
 
 // Instantiate registers
@@ -77,8 +77,6 @@ RwLRI #(.WIDTH(16)) DR (.clk(clk), .WE(LD_DR), .INC(INR_DR), .RST(CLR_DR), .DATA
 RwLRI #(.WIDTH(16)) AC (.clk(clk), .WE(LD_AC), .INC(INR_AC), .RST(CLR_AC), .DATA(w_ALU), .A(w_AC));
 RwLRI #(.WIDTH(16)) IR (.clk(clk), .WE(LD_IR), .INC(), .RST(), .DATA(BUS[WIDTH-1:0]), .A(w_IR));
 RwLRI #(.WIDTH(16)) TR (.clk(clk), .WE(LD_TR), .INC(INR_TR), .RST(CLR_TR), .DATA(BUS[WIDTH-1:0]), .A(w_TR));
-
-
 
 // Assign values to the array
 assign MUX_ARRAY[0] = {4'b0, w_AR};  // Input 0: AR (extended 12-bit to 16-bit)

@@ -7,27 +7,13 @@ from cocotb.triggers import FallingEdge
 DEBUG = True
 
 #CHANGE THE BELOW SIGNAL NAMES TO MATCH YOUR DESIGN!!!!!!!!!!!!!!!!!
-def print_my_computer_please(dut):
-    #Log whatever signal you want from the datapath, called before positive clock edge
-    dut._log.info("************ DUT Signals ***************")
-    """ dut._log.info(f" PC: {dut.PC.value}\t {hex(dut.PC.value)}\n\
-    AR: {dut.AR.value}\t {hex(dut.AR.value)}\n\
-    IR: {dut.IR.value}\t {hex(dut.IR.value)}\n\
-    AC: {dut.AC.value}\t {hex(dut.AC.value)}\n\
-    DR: {dut.DR.value}\t {hex(dut.DR.value)}\n") 
-    dut._log.info(f"IN: {dut.IN.value}")
-    dut._log.info(f"DR: {dut.DRI.value}")
-    dut._log.info(f"RES:{dut.RES.value}")
-    dut._log.info(f"CO: {dut.w_CO.value}")
-    dut._log.info(f"Z: {dut.Z.value}")
-    dut._log.info(f"N: {dut.N.value}")
-    dut._log.info(f"OVF: {dut.OVF.value}")
-    dut._log.info(f"E: {dut.w_E.value}")
-    dut._log.info(f"SEL: {dut.SELECT.value}") 
-    dut._log.info(f"w_R_DATA: {dut.w_R_DATA.value}")
-    dut._log.info(f"w_IN_ADF: {dut.w_IN_ADF.value}")
-    dut._log.info(f"w_MWE: {dut.w_MWE.value}")
-    dut._log.info(f"w_W_DATA: {dut.w_W_DATA.value}") """
+def printRegisters(dut):
+    dut._log.info(f"T:  {dut.controller.sc.T.value}") # T1
+    dut._log.info(f"PC: {dut.PC.value}")
+    dut._log.info(f"AR: {dut.AR.value}")
+    dut._log.info(f"IR: {dut.IR.value}")
+    dut._log.info(f"AC: {dut.AC.value}")
+    dut._log.info(f"DR: {dut.DR.value}")
 
 
 @cocotb.test()
@@ -49,7 +35,7 @@ async def basic_computer_test(dut):
 
         #Log values if debugging
         if DEBUG:
-            print_my_computer_please(dut)
+            printRegisters(dut)
             pass
             
         #Sımple match-case structure to test when needed
@@ -162,25 +148,88 @@ async def controller_test(dut):
     # Initialize values
     address = 193          # Address to write to
     value_to_write = 31    # Value to write
+    dut.data_path.memory.MEMORY[address].value = 31
+    dut.data_path.PC.A.value = address
 
     #Start the clock
     await cocotb.start(Clock(dut.clk, 10, 'us').start(start_high=False))
     #Get the fallin edge to work with
     clkedge = FallingEdge(dut.clk)
     
+    dut._log.info(f"T: {dut.controller.sc.T.value}") # T0
+    dut._log.info(f"PC: {dut.PC.value}")
+    dut._log.info(f"AR: {dut.AR.value}")
     await clkedge
     # Write operation
-    dut._log.info("Starting Write Operation")
-    dut.w_WRD.value = address 
-    dut._log.info(dut.PC.value)
+    dut._log.info("Starting Clock Operation")
+    dut._log.info(f"T:  {dut.controller.sc.T.value}") # T1
+    dut._log.info(f"IR: {dut.IR.value}")
+    dut._log.info(f"PC: {dut.PC.value}")
+    dut._log.info(f"AR: {dut.AR.value}")
+    dut._log.info("CYCLE: 1 --------------")
+    #dut._log.info(dut.w_BUS_SEL.value)
     await clkedge  # Wait for one clock cycle to latch address and data
-    dut._log.info(dut.PC.value)
+    dut._log.info(f"T:  {dut.controller.sc.T.value}") # T2
+    dut._log.info(f"AR: {dut.AR.value}")
+    dut._log.info(f"IR: {dut.IR.value}")
+    dut._log.info("CYCLE: 2 --------------")
     await clkedge
-    dut._log.info(dut.PC.value)
+    dut._log.info(f"T:  {dut.controller.sc.T.value}")
+    dut._log.info(f"IR: {dut.IR.value}")
+    dut._log.info(dut.controller.sc.T.value)  # T3
+    dut._log.info("CYCLE: 3 --------------")
+    await clkedge
+    dut._log.info(f"T:  {dut.controller.sc.T.value}")
+    dut._log.info(f"AR: {dut.AR.value}")
+    dut._log.info("CYCLE: 4 --------------")
 
     # Assert the result
-    assert dut.w_WRD.value == value_to_write, f"Read value {dut.w_WRD.value} does not match written value {value_to_write}"
+    assert dut.IR.value == value_to_write, f"Read value {dut.w_WRD.value} does not match written value {value_to_write}"
     dut._log.info(f"Read-Back Successful: Address={address}, Value={dut.w_WRD.value}")
     
+    
+    dut._log.info("BC I test ended successfully!")
+
+@cocotb.test()
+async def CLA_test(dut):
+    """Try accessing the design."""
+    # Initialize values
+    instruction = 30720 # CLA
+    address = 193          # Address to write to
+    ac_value = 132         # Initial AC to be cleared by CLA 
+    dut.data_path.memory.MEMORY[address].value = instruction
+    dut.data_path.PC.A.value = address
+    dut.data_path.AC.A.value = ac_value
+
+    #Start the clock
+    await cocotb.start(Clock(dut.clk, 10, 'us').start(start_high=False))
+    clkedge = FallingEdge(dut.clk)
+
+    for cycle in range(8):
+        await clkedge
+
+        #Logging the values if debugging
+        if DEBUG:
+            printRegisters(dut)
+            pass
+            
+        match cycle:
+            case 0 | 1 | 2: ### FETCH
+                dut._log.info(f"Cycle count: {cycle} ----------\n")
+                assert dut.AC.value == ac_value, f"Read value {dut.AC.value} does not match the AC value {ac_value}"
+            ### ENDFETCH
+
+            case 3: ### EXECUTE CLA
+                dut._log.info(f"Cycle count: {cycle} ----------\n")
+                assert dut.AC.value == ac_value, f"Read value {dut.AC.value} does not match the written AC value {ac_value}"
+            
+            case 4: 
+                dut._log.info(f"Cycle count: {cycle} ----------\n")
+                assert dut.AC.value == 0, f"The AC: {dut.AC.value} is not cleared"
+                dut._log.info(f"Read-Back Successful: Address={address}, Value={dut.w_WRD.value}")
+            ### ENDEXECUTE CLA
+
+            case _:
+                dut._log.info(f"Cycle count: {cycle} ----------\n")
     
     dut._log.info("BC I test ended successfully!")

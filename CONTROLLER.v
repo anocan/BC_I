@@ -16,6 +16,7 @@ wire [2:0] OPCODE = IR[14:12];
 reg I;
 
 initial begin
+    INR_SC = 1'b0;
 end
 
 // DECODER
@@ -44,13 +45,12 @@ SC sc(
 
 // COMBINATONAL CONTROL LOGICS
 
-// FETCH
-
 always @(*) begin
     BUS_SEL = 3'b000;
     CTRL_SGNLS = 16'b0;
     INR_SC = 1'b0;
 
+    // FETCH
     case (1'b1)
         T[0]: begin // AR <- PC
             BUS_SEL = 3'b001;
@@ -69,9 +69,24 @@ always @(*) begin
             I = IR[15];
             INR_SC = 1'b1;
         end
+        
+    // EXECUTE
+        T[3]: begin
+            // REGISTER REFERENCE (NO I/O OPERATION ASSUMED)
+            if (D[7]) begin // SC <- 0, 
+                CLR_SC = 0;
+                case (1'b1)
+                    IR[11]: begin
+                        CTRL_SGNLS[11] = 1'b1;
+                    end
+
+                    //default: 
+                endcase
+            end
+        end
+
         //default: 
-endcase
-    
+    endcase
 end
 
 endmodule

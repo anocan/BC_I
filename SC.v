@@ -9,7 +9,8 @@ module SC(
 reg [3:0] SQ;  
     
 initial begin
-    SQ = 4'b0;    
+    SQ = 4'b0;
+    T = 16'b0; 
 end   
 
 always @(posedge clk) begin

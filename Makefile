@@ -36,6 +36,9 @@ test3:
 test4:
 	$(MAKE) sim TOPLEVEL=$(TOPLEVEL) MODULE=$(MODULE) TESTCASE=controller_test
 
+testCLA:
+	$(MAKE) sim TOPLEVEL=$(TOPLEVEL) MODULE=$(MODULE) TESTCASE=CLA_test
+
 clear:
 	rm -rf sim_build results.xml *.vcd
 
