@@ -19,6 +19,8 @@ wire [2:0] w_CTRL_SGNLS [0:CTRL_LNGTH-1];
 wire [WIDTH-1:0] w_IR, w_DR, w_AC;
 wire [11:0] w_AR, w_PC;
 
+wire w_CO, w_Z, w_N, w_OVF;
+
 initial begin
 end
 
@@ -37,13 +39,21 @@ DATA_PATH data_path(
 .IR_OUT(w_IR),
 .AC_OUT(w_AC),
 .DR_OUT(w_DR),
+.CO(w_CO),
+.Z(w_Z),
+.N(w_N),
+.OVF(w_OVF),
 .WRD(w_WRD)   
 );
 
 CONTROLLER controller(
 .clk(clk),
 .IR(w_IR),
-.BUS_SEL(w_BUS_SEL), 
+.BUS_SEL(w_BUS_SEL),
+.CO(w_CO),
+.Z(w_Z),
+.N(w_N),
+.OVF(w_OVF), 
 .CTRL_SGNLS(w_CTRL_SGNLS)
 );
 

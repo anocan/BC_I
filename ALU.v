@@ -14,6 +14,7 @@ module ALU #(
 );
 
 initial begin
+    RESULT = 0;
     CO = 0;
     OVF = 0;
 end
@@ -45,8 +46,8 @@ always@(*) begin
             RESULT[0] = E;
             CNTRL_E = {CO,~CO};
         end
-        3'b111: RESULT = RESULT; // NOP
-        default: RESULT = RESULT; // NOP
+        3'b111: RESULT = AC; // NOP
+        default: RESULT = AC; // NOP
 	endcase
     Z = RESULT == 0;
     N = RESULT[WIDTH-1];

@@ -4,6 +4,7 @@ module CONTROLLER #(
 (  
     input clk,
     input [15:0] IR,
+    input CO, input Z, input N, input OVF,
     output reg [2:0] BUS_SEL, 
     output reg [2:0] CTRL_SGNLS [0:CTRL_LNGTH-1]
 );
@@ -97,7 +98,10 @@ always @(*) begin
                         CTRL_SGNLS[9] = 1'b1;
                         CTRL_SGNLS[20] = 3'b101; 
                     end
-                    IR[5]: CTRL_SGNLS[10] = 1'b1;
+                    IR[5]: CTRL_SGNLS[10] = 1'b1; //AC <- AC + 1
+                    IR[4]: if (~N) begin
+                        CTRL_SGNLS[4] = 1'b1; 
+                    end
                     //default: 
                 endcase
             end

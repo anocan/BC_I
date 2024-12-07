@@ -10,7 +10,8 @@ module DATA_PATH #(
     output [11:0] AR_OUT,
     output [WIDTH-1:0] IR_OUT,
     output [WIDTH-1:0] AC_OUT,
-    output [WIDTH-1:0] DR_OUT
+    output [WIDTH-1:0] DR_OUT,
+    output CO, output Z, output N, output OVF
 );
 
 wire [WIDTH-1:0] MUX_ARRAY [0:7]; // Array of 8 inputs, each 16-bit wide
@@ -120,10 +121,10 @@ ALU alu(
 .CNTRL_E(w_CNTRL_E),
 .E(w_E),
 .OPSEL(OPSEL_ALU),
-.CO(),
-.Z(),
-.N(),
-.OVF()
+.CO(CO),
+.Z(Z),
+.N(N),
+.OVF(OVF)
 ); 
 
 E_FF e_ff(

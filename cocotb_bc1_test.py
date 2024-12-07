@@ -15,8 +15,9 @@ def printRegisters(dut):
     dut._log.info(f"AC: {dut.AC.value}")
     dut._log.info(f"DR: {dut.DR.value}")
     dut._log.info(f"OPSEL: {dut.data_path.OPSEL_ALU.value}")
-    dut._log.info(f"CNTRL: {dut.w_CTRL_SGNLS.value[20]}")
-    dut._log.info(f"E: {dut.data_path.e_ff.E.value}")
+    dut._log.info(f"CNTRL: {dut.w_CTRL_SGNLS.value[4]}")
+    #dut._log.info(f"E: {dut.data_path.e_ff.E.value}")
+    dut._log.info(f"N: {dut.controller.N.value}")
 
 
 @cocotb.test()
@@ -556,6 +557,48 @@ async def INC_test(dut):
             case 4: 
                 dut._log.info(f"Cycle count: {cycle} ----------\n")
                 assert dut.data_path.AC.A.value == ac_value+1, f"The AC: {dut.data_path.AC.A.value} is not incremented to {ac_value+1}"
+            ### ENDEXECUTE
+
+            case _:
+                dut._log.info(f"Cycle count: {cycle} ----------\n")
+    
+    dut._log.info("BC I test ended successfully!")
+
+@cocotb.test()
+async def SPA_test(dut):
+    """Try accessing the design."""
+    # Initialize values
+    instruction = 28688 # SPA
+    address = 1002          # Address to write to
+    ac_value = 2**15-1         # Initial AC to be complemented
+    dut.data_path.memory.MEMORY[address].value = instruction
+    dut.data_path.PC.A.value = address
+    dut.data_path.AC.A.value = ac_value
+
+    #Start the clock
+    await cocotb.start(Clock(dut.clk, 10, 'us').start(start_high=False))
+    clkedge = FallingEdge(dut.clk)
+
+    for cycle in range(8):
+        await clkedge
+
+        #Logging the values if debugging
+        if DEBUG:
+            printRegisters(dut)
+            
+        match cycle:
+            case 0 | 1 | 2: ### FETCH
+                dut._log.info(f"Cycle count: {cycle} ----------\n")
+                #assert dut.data_path.AC.A.value == ac_value, f"Read value {dut.data_path.AC.A.value} does not match the written AC value {ac_value}"
+            ### ENDFETCH
+
+            case 3: ### EXECUTE SPA
+                dut._log.info(f"Cycle count: {cycle} ----------\n")
+                assert dut.PC.value == address+1, f"Read value {dut.PC.value} does not match the PC+1 value {address+1}"
+            
+            case 4: 
+                dut._log.info(f"Cycle count: {cycle} ----------\n")
+                assert dut.PC.value == address+2, f"Read value {dut.PC.value} does not match the PC+2 value {address+2}"
             ### ENDEXECUTE
 
             case _:
