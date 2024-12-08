@@ -17,9 +17,10 @@ def printRegisters(dut):
     #dut._log.info(f"D: {dut.controller.D.value}")
     #dut._log.info(f"OPSEL: {dut.data_path.OPSEL_ALU.value}")
     #dut._log.info(f"CNTRL: {dut.w_CTRL_SGNLS.value[4]}")
-    #dut._log.info(f"E: {dut.data_path.e_ff.E.value}")
+    dut._log.info(f"E: {dut.data_path.e_ff.E.value}")
     #dut._log.info(f"N: {dut.controller.N.value}")
     #dut._log.info(f"Z: {dut.controller.Z.value}")
+    dut._log.info(f"OVF: {dut.controller.OVF.value}")
 
 
 @cocotb.test()
@@ -820,7 +821,7 @@ async def AND_test(dut):
             ### ENDEXECUTE #1
             case 6 | 7 | 8:  ### FETCH #2
                 dut._log.info(f"Cycle count: {cycle} ----------\n")
-                assert dut.AC.value == expected_result_direct, f"Read value {dut.DR.value} does not match the expected value {expected_result_direct}"
+                assert dut.AC.value == expected_result_direct, f"Read value {dut.AC.value} does not match the expected value {expected_result_direct}"
             ### ENDFETCH #2
 
             case 9: ### INDIRECT
@@ -832,7 +833,82 @@ async def AND_test(dut):
                 assert dut.DR.value == memory_value_2, f"Read value {dut.DR.value} does not match the expected value {memory_value_2}"
             case 12:
                 dut._log.info(f"Cycle count: {cycle} ----------\n")
-                assert dut.AC.value == expected_result_indirect, f"Read value {dut.DR.value} does not match the expected value {expected_result_indirect}"
+                assert dut.AC.value == expected_result_indirect, f"Read value {dut.AC.value} does not match the expected value {expected_result_indirect}"
+            ### ENDEXECUTE #2
+
+            case _:
+                dut._log.info(f"Cycle count: {cycle} ----------\n")
+    
+    dut._log.info("BC I test ended successfully!")
+
+@cocotb.test()
+async def ADD_test(dut):
+    """Try accessing the design."""
+    # --- Test Setup ---
+    instruction_direct = 0b0001000000000100  # ADD with direct addressing mode
+    instruction_indirect = 0b1001000000000100  # ADD with indirect addressing mode
+    target_address = 4  # Memory address to perform ADD
+    memory_value = 0b0010101010101010  # Value in memory to ADD with 
+    memory_value_2 = 0b1110100011101011
+    ac_initial_value = 0b1100110011001100  # Initial AC value
+    expected_result_direct = ac_initial_value + memory_value
+    expected_result_indirect = expected_result_direct + memory_value_2
+    print(expected_result_direct, expected_result_indirect)
+    e_value = 0
+
+    # Direct addressing mode setup
+    dut.data_path.memory.MEMORY[target_address].value = memory_value  # Set memory value
+    dut.data_path.memory.MEMORY[1002].value = instruction_direct  # Load instruction in memory
+    dut.data_path.memory.MEMORY[1003].value = instruction_indirect  # Load instruction in memory
+    dut.data_path.memory.MEMORY[2730].value = memory_value_2  # Load instruction in memory
+    dut.data_path.AC.A.value = ac_initial_value  # Initialize AC
+    dut.data_path.PC.A.value = 1002  # Set PC to instruction address
+    dut.data_path.e_ff.E.value = e_value
+
+    #Start the clock
+    await cocotb.start(Clock(dut.clk, 10, 'us').start(start_high=False))
+    clkedge = FallingEdge(dut.clk)
+
+    for cycle in range(14):
+        await clkedge
+
+        #Logging the values if debugging
+        if DEBUG:
+            printRegisters(dut)
+            
+        match cycle:
+            case 0 | 1 | 2: ### FETCH
+                dut._log.info(f"Cycle count: {cycle} ----------\n")
+            ### ENDFETCH
+
+            case 4: ### EXECUTE ADD
+                dut._log.info(f"Cycle count: {cycle} ----------\n")
+            
+            case 5: 
+                dut._log.info(f"Cycle count: {cycle} ----------\n")
+                ovf = dut.data_path.OVF.value
+                assert dut.DR.value == memory_value, f"Read value {dut.DR.value} does not match the expected value {memory_value}"
+            ### ENDEXECUTE #1
+            case 6 | 7 | 8:  ### FETCH #2
+                dut._log.info(f"Cycle count: {cycle} ----------\n")
+                if (dut.data_path.e_ff.E.value == 1): # If there is carry out
+                    expected_result_indirect = expected_result_indirect & 0b01111111111111111 # This eliminates the python's result of the python calculation 17th bit to match AC size of 16 bits
+                assert dut.AC.value == expected_result_direct, f"Read value {dut.AC.value} does not match the expected value {expected_result_direct}, check if Overflow occurs: {ovf}"
+            ### ENDFETCH #2
+
+            case 9: ### INDIRECT
+                dut._log.info(f"Cycle count: {cycle} ----------\n")            
+            case 10: ### EXECUTE ADD #2
+                dut._log.info(f"Cycle count: {cycle} ----------\n")
+            case 11:
+                dut._log.info(f"Cycle count: {cycle} ----------\n")
+                assert dut.DR.value == memory_value_2, f"Read value {dut.DR.value} does not match the expected value {memory_value_2}"
+            case 12:
+                dut._log.info(f"Cycle count: {cycle} ----------\n")
+                ovf = dut.data_path.OVF.value
+                if (dut.data_path.e_ff.E.value == 1): # If there is carry out
+                    expected_result_indirect = expected_result_indirect & 0b01111111111111111 # This eliminates the python's result of the python calculation 17th bit to match AC size of 16 bits
+                assert dut.AC.value  == expected_result_indirect, f"Read value {dut.AC.value} does not match the expected value {expected_result_indirect}, check if Overflow occurs: {ovf}"
             ### ENDEXECUTE #2
 
             case _:

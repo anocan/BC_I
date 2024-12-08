@@ -130,6 +130,11 @@ always @(*) begin
                     INR_SC = 1'b1;
                     BUS_SEL = 3'b110;
                     CTRL_SGNLS[6] = 1'b1;
+                end
+                D[1]: begin // ADD: DR <- M[AR]
+                    INR_SC = 1'b1;
+                    BUS_SEL = 3'b110;
+                    CTRL_SGNLS[6] = 1'b1;                  
                 end 
                 //default: 
             endcase
@@ -138,9 +143,13 @@ always @(*) begin
             case (1'b1)
                 D[0]: begin // AND: AC <- AC ∧ DR, SC <- 0
                     CLR_SC = 1'b1;
-                    BUS_SEL = 3'b110;
                     CTRL_SGNLS[9] = 1'b1;
                     CTRL_SGNLS[20] = 3'b001;
+                end
+                D[1]: begin // AC <- AC + DR, E <- CO, SC <- 0
+                    CLR_SC = 1'b1;
+                    CTRL_SGNLS[9] = 1'b1;
+                    CTRL_SGNLS[20] = 3'b000;
                 end 
                 //default: 
             endcase            

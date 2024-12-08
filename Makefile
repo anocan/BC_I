@@ -75,7 +75,10 @@ testHLT:
 
 # Memory Reference Instructions
 testAND:
+
 	$(MAKE) sim TOPLEVEL=$(TOPLEVEL) MODULE=$(MODULE) TESTCASE=AND_test
+testADD:
+	$(MAKE) sim TOPLEVEL=$(TOPLEVEL) MODULE=$(MODULE) TESTCASE=ADD_test
 
 clear:
 	rm -rf sim_build results.xml *.vcd
