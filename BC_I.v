@@ -19,9 +19,6 @@ wire [11:0] w_AR, w_PC;
 
 wire w_CO, w_Z, w_N, w_OVF, w_EFF;
 
-initial begin
-end
-
 assign PC = w_PC;
 assign AR = w_AR;
 assign IR = w_IR;

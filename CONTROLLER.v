@@ -98,15 +98,18 @@ always @(*) begin
                         CTRL_SGNLS[9] = 1'b1;
                         CTRL_SGNLS[20] = 3'b101; 
                     end
-                    IR[5]: CTRL_SGNLS[10] = 1'b1; //AC <- AC + 1
-                    IR[4]: if (~N) begin // if (AC(15) === 0) then PC <- PC + 1
-                        CTRL_SGNLS[4] = 1'b1; 
+                    IR[5]: CTRL_SGNLS[10] = 1'b1; // AC <- AC + 1
+                    IR[4]: begin // if (AC(15) === 0) then PC <- PC + 1
+                        CTRL_SGNLS[20] = 3'b011;
+                        if (N) CTRL_SGNLS[4] = 1'b1;
                     end
-                    IR[3]: if (N) begin // if (AC(15) === 1) then PC <- PC + 1
-                        CTRL_SGNLS[4] = 1'b1;
+                    IR[3]: begin // if (AC(15) === 1) then PC <- PC + 1
+                        CTRL_SGNLS[20] = 3'b011;
+                        if (~N) CTRL_SGNLS[4] = 1'b1;
                     end
-                    IR[2]: if (Z) begin // if (AC === 0) then PC <- PC + 1
-                        CTRL_SGNLS[4] = 1'b1;
+                    IR[2]: begin // if (AC === 0) then PC <- PC + 1
+                        CTRL_SGNLS[20] = 3'b011;
+                        if (~Z) CTRL_SGNLS[4] = 1'b1;
                     end
                     IR[1]: if (~E_IN) begin // if (E === 0) then PC <- PC + 1
                         CTRL_SGNLS[4] = 1'b1;
