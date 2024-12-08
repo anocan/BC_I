@@ -95,6 +95,10 @@ testBSA:
 testISZ:
 	$(MAKE) sim TOPLEVEL=$(TOPLEVEL) MODULE=$(MODULE) TESTCASE=ISZ_test
 
+# Interrupt Test
+testR:
+	$(MAKE) sim TOPLEVEL=$(TOPLEVEL) MODULE=$(MODULE) TESTCASE=R_test
+
 clear:
 	rm -rf sim_build results.xml *.vcd
 

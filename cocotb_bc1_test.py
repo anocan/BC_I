@@ -14,6 +14,10 @@ def printRegisters(dut):
     dut._log.info(f"IR: {dut.IR.value}")
     dut._log.info(f"AC: {dut.AC.value}")
     dut._log.info(f"DR: {dut.DR.value}")
+    dut._log.info(f"TR: {dut.data_path.TR.A.value}")
+    dut._log.info(f"FGI: {dut.FGI.value}")
+    dut._log.info(f"R: {dut.controller.R.value}")
+    dut._log.info(f"IEN: {dut.controller.IEN.value}")
     #dut._log.info(f"D: {dut.controller.D.value}")
     #dut._log.info(f"OPSEL: {dut.data_path.OPSEL_ALU.value}")
     #dut._log.info(f"CNTRL: {dut.w_CTRL_SGNLS.value[4]}")
@@ -29,6 +33,7 @@ async def basic_computer_test(dut):
     A = 562
     B = 3131
     dut.w_IN_ADF.value = A
+    dut.FGI.value = 0
 
     #dut.FGI.value = 0
     #Start the clock
@@ -96,6 +101,7 @@ async def alu_test(dut):
     dut._log.info(f"N: {dut.N.value}")
     dut._log.info(f"Z: {dut.Z.value}")
     dut._log.info(f"OVF: {dut.OVF.value}")
+    dut.FGI.value = 0
 
     assert dut.RESULT.value == dut.AC.value + dut.DR.value 
 
@@ -111,6 +117,7 @@ async def data_path_test(dut):
     dut.BUS_SEL.value = 0  # Default to AR
     address = 193          # Address to write to
     value_to_write = 31    # Value to write
+    dut.FGI.value = 0
 
     #Start the clock
     await cocotb.start(Clock(dut.clk, 10, 'us').start(start_high=False))
@@ -157,6 +164,7 @@ async def controller_test(dut):
     value_to_write = 31    # Value to write
     dut.data_path.memory.MEMORY[address].value = 31
     dut.data_path.PC.A.value = address
+    dut.FGI.value = 0
 
     #Start the clock
     await cocotb.start(Clock(dut.clk, 10, 'us').start(start_high=False))
@@ -207,6 +215,7 @@ async def CLA_test(dut):
     dut.data_path.memory.MEMORY[address].value = instruction
     dut.data_path.PC.A.value = address
     dut.data_path.AC.A.value = ac_value
+    dut.FGI.value = 0
 
     #Start the clock
     await cocotb.start(Clock(dut.clk, 10, 'us').start(start_high=False))
@@ -250,6 +259,7 @@ async def CLE_test(dut):
     dut.data_path.memory.MEMORY[address].value = instruction
     dut.data_path.PC.A.value = address
     dut.data_path.e_ff.E.value = e_value
+    dut.FGI.value = 0
 
     #Start the clock
     await cocotb.start(Clock(dut.clk, 10, 'us').start(start_high=False))
@@ -294,6 +304,7 @@ async def CMA_test(dut):
     dut.data_path.memory.MEMORY[address].value = instruction
     dut.data_path.PC.A.value = address
     dut.data_path.AC.A.value = ac_value
+    dut.FGI.value = 0
 
     #Start the clock
     await cocotb.start(Clock(dut.clk, 10, 'us').start(start_high=False))
@@ -339,6 +350,7 @@ async def CME_test(dut):
     dut.data_path.memory.MEMORY[address+1].value = instruction # 2 CME Instructions
     dut.data_path.PC.A.value = address
     dut.data_path.e_ff.E.value = e_value
+    dut.FGI.value = 0
 
     #Start the clock
     await cocotb.start(Clock(dut.clk, 10, 'us').start(start_high=False))
@@ -396,6 +408,7 @@ async def CIR_test(dut):
     dut.data_path.AC.A.value = ac_value
     dut.data_path.e_ff.E.value = e_value # Initial E value 
     flag = 1
+    dut.FGI.value = 0
     
 
     #Start the clock
@@ -472,6 +485,7 @@ async def CIL_test(dut):
     dut.data_path.PC.A.value = address  # Set PC to instruction start address
     dut.data_path.AC.A.value = ac_value  # Set initial AC value
     dut.data_path.e_ff.E.value = e_value  # Set initial E value
+    dut.FGI.value = 0
 
     # Start the clock
     await cocotb.start(Clock(dut.clk, 10, 'us').start(start_high=False))
@@ -535,6 +549,7 @@ async def INC_test(dut):
     dut.data_path.memory.MEMORY[address].value = instruction
     dut.data_path.PC.A.value = address
     dut.data_path.AC.A.value = ac_value
+    dut.FGI.value = 0
 
     #Start the clock
     await cocotb.start(Clock(dut.clk, 10, 'us').start(start_high=False))
@@ -577,6 +592,7 @@ async def SPA_test(dut):
     dut.data_path.memory.MEMORY[address].value = instruction
     dut.data_path.PC.A.value = address
     dut.data_path.AC.A.value = ac_value
+    dut.FGI.value = 0
 
     #Start the clock
     await cocotb.start(Clock(dut.clk, 10, 'us').start(start_high=False))
@@ -619,6 +635,7 @@ async def SNA_test(dut):
     dut.data_path.memory.MEMORY[address].value = instruction
     dut.data_path.PC.A.value = address
     dut.data_path.AC.A.value = ac_value
+    dut.FGI.value = 0
 
     #Start the clock
     await cocotb.start(Clock(dut.clk, 10, 'us').start(start_high=False))
@@ -661,6 +678,7 @@ async def SZA_test(dut):
     dut.data_path.memory.MEMORY[address].value = instruction
     dut.data_path.PC.A.value = address
     dut.data_path.AC.A.value = ac_value
+    dut.FGI.value = 0
 
     #Start the clock
     await cocotb.start(Clock(dut.clk, 10, 'us').start(start_high=False))
@@ -703,6 +721,7 @@ async def SZE_test(dut):
     dut.data_path.memory.MEMORY[address].value = instruction
     dut.data_path.PC.A.value = address
     dut.data_path.e_ff.E.value = e_value
+    dut.FGI.value = 0
 
     #Start the clock
     await cocotb.start(Clock(dut.clk, 10, 'us').start(start_high=False))
@@ -743,6 +762,7 @@ async def HLT_test(dut):
     address = 1002          # Address to write to
     dut.data_path.memory.MEMORY[address].value = instruction
     dut.data_path.PC.A.value = address
+    dut.FGI.value = 0
 
     #Start the clock
     await cocotb.start(Clock(dut.clk, 10, 'us').start(start_high=False))
@@ -789,6 +809,7 @@ async def AND_test(dut):
     expected_result_indirect = expected_result_direct & memory_value_2
 
     # Direct addressing mode setup
+    dut.FGI.value = 0
     dut.data_path.memory.MEMORY[target_address].value = memory_value  # Set memory value
     dut.data_path.memory.MEMORY[1002].value = instruction_direct  # Load instruction in memory
     dut.data_path.memory.MEMORY[1003].value = instruction_indirect  # Load instruction in memory
@@ -863,6 +884,7 @@ async def ADD_test(dut):
     dut.data_path.AC.A.value = ac_initial_value  # Initialize AC
     dut.data_path.PC.A.value = 1002  # Set PC to instruction address
     dut.data_path.e_ff.E.value = e_value
+    dut.FGI.value = 0
 
     #Start the clock
     await cocotb.start(Clock(dut.clk, 10, 'us').start(start_high=False))
@@ -933,6 +955,7 @@ async def LDA_test(dut):
     dut.data_path.memory.MEMORY[1003].value = instruction_indirect  # Load instruction in memory
     dut.data_path.memory.MEMORY[2730].value = memory_value_2  # Load instruction in memory
     dut.data_path.PC.A.value = 1002  # Set PC to instruction address
+    dut.FGI.value = 0
 
     #Start the clock
     await cocotb.start(Clock(dut.clk, 10, 'us').start(start_high=False))
@@ -995,6 +1018,7 @@ async def STA_test(dut):
     dut.data_path.memory.MEMORY[2730].value = memory_value_2  # Load instruction in memory
     dut.data_path.AC.A.value = ac_value  # Set PC to instruction address
     dut.data_path.PC.A.value = 1003  # Set PC to instruction address
+    dut.FGI.value = 0
 
     #Start the clock
     await cocotb.start(Clock(dut.clk, 10, 'us').start(start_high=False))
@@ -1038,6 +1062,7 @@ async def BUN_test(dut):
     dut.data_path.memory.MEMORY[target_address].value = memory_value  # Set memory value
     dut.data_path.memory.MEMORY[1003].value = instruction_indirect  # Load instruction in memory
     dut.data_path.PC.A.value = 1003  # Set PC to instruction address
+    dut.FGI.value = 0
 
     #Start the clock
     await cocotb.start(Clock(dut.clk, 10, 'us').start(start_high=False))
@@ -1082,6 +1107,7 @@ async def BSA_test(dut):
     dut.data_path.memory.MEMORY[target_address].value = memory_value  # Set memory value
     dut.data_path.memory.MEMORY[pc].value = instruction_indirect  # Load instruction in memory
     dut.data_path.PC.A.value = pc  # Set PC to instruction address
+    dut.FGI.value = 0
 
     #Start the clock
     await cocotb.start(Clock(dut.clk, 10, 'us').start(start_high=False))
@@ -1132,6 +1158,7 @@ async def ISZ_test(dut):
     dut.data_path.memory.MEMORY[effective_address].value = memory_value_2  # Set memory value
     dut.data_path.memory.MEMORY[pc].value = instruction_indirect  # Load instruction in memory
     dut.data_path.PC.A.value = pc  # Set PC to instruction address
+    dut.FGI.value = 0
 
     #Start the clock
     await cocotb.start(Clock(dut.clk, 10, 'us').start(start_high=False))
@@ -1168,6 +1195,82 @@ async def ISZ_test(dut):
                 if (dut.DR.value == 0): pc = pc + 1
                 assert dut.PC.value == pc + 1, f"Read value {dut.PC.value} does not match the expected value {pc + 1}"                    
             ### ENDEXECUTE #1
+            case _:
+                dut._log.info(f"Cycle count: {cycle} ----------\n")
+    
+    dut._log.info("BC I test ended successfully!")
+
+@cocotb.test()
+async def R_test(dut):
+    """Try accessing the design."""
+    # --- Test Setup ---
+    instruction_direct = 0b0010000000000110  # LDA with direct addressing mode
+    instruction_indirect = 0b1010000000000110  # LDA with indirect addressing mode
+    target_address = 6  # Memory address to perform ADD
+    memory_value = 0b0010101010101010  # Value in memory to ADD with 
+    memory_value_2 = 0b1110100011101011
+    expected_result_direct = memory_value
+    bun_0 = 0xC000
+
+    interrupt_instruction = 0b0000000000011111
+
+    # Direct addressing mode setup
+    dut.data_path.memory.MEMORY[target_address].value = memory_value  # Set memory value
+    dut.data_path.memory.MEMORY[1].value =  interrupt_instruction
+    dut.data_path.memory.MEMORY[2].value =  bun_0
+    dut.data_path.memory.MEMORY[interrupt_instruction].value = 0b0101010101010101
+    dut.data_path.memory.MEMORY[1002].value = instruction_direct  # Load instruction in memory
+    dut.data_path.memory.MEMORY[1003].value = instruction_indirect  # Load instruction in memory
+    dut.data_path.memory.MEMORY[2730].value = memory_value_2  # Load instruction in memory
+    dut.data_path.PC.A.value = 1002  # Set PC to instruction address
+    dut.data_path.AC.A.value = 0b0011001100110110
+    dut.FGI.value = 0
+
+    #Start the clock
+    await cocotb.start(Clock(dut.clk, 10, 'us').start(start_high=False))
+    clkedge = FallingEdge(dut.clk)
+
+    for cycle in range(24):
+        await clkedge
+
+        #Logging the values if debugging
+        if DEBUG:
+            printRegisters(dut)
+            
+        match cycle:
+            case 0 | 1 | 2: ### FETCH
+                if cycle == 1: dut.FGI.value = 1
+                dut._log.info(f"Cycle count: {cycle} ----------\n")
+            ### ENDFETCH
+
+            case 4: ### EXECUTE LDA
+                dut._log.info(f"Cycle count: {cycle} ----------\n")
+            
+            case 5: 
+                dut._log.info(f"Cycle count: {cycle} ----------\n")
+                assert dut.DR.value == memory_value, f"Read value {dut.DR.value} does not match the expected value {memory_value}"
+            ### ENDEXECUTE #1
+            case 6 | 7 | 8:  ### FETCH INTERRUPT
+                dut._log.info(f"Cycle count: {cycle} ----------\n")
+                assert dut.AC.value == expected_result_direct, f"Read value {dut.AC.value} does not match the expected value {expected_result_direct}"
+            ### ENDFETCH INTERRUPT
+
+            case 9: # DIRECT ADDRESSING
+                dut._log.info(f"Cycle count: {cycle} ----------\n")            
+            case 10 | 11: ### EXECUTE INTERRUPT AND
+                dut._log.info(f"Cycle count: {cycle} ----------\n")
+            case 12:
+                dut.controller.IEN.value = 1; 
+                dut._log.info(f"Cycle count: {cycle} ----------\n")
+                assert dut.AR.value == interrupt_instruction & 0b0000111111111111, f"Read value {dut.AR.value} does not match the expected value {interrupt_instruction & 0b0000111111111111}"
+            case 14: # DIRECT ADDRESSING
+                dut._log.info(f"Cycle count: {cycle} ----------\n")
+                assert dut.DR.value  == 0b0101010101010101, f"Read value {dut.DR.value} does not match the expected value {0b0101010101010101}"
+            case 15:
+                dut._log.info(f"Cycle count: {cycle} ----------\n")
+                assert dut.AC.value  == memory_value & dut.DR.value, f"Read value {dut.AC.value} does not match the expected value {memory_value & dut.DR.value}"
+            ### ENDEXECUTE INTERRUPT AND
+
             case _:
                 dut._log.info(f"Cycle count: {cycle} ----------\n")
     

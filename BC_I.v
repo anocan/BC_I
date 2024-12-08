@@ -49,7 +49,8 @@ CONTROLLER controller(
 .Z(w_Z),
 .N(w_N),
 .OVF(w_OVF),
-.E_IN(w_EFF), 
+.E_IN(w_EFF),
+.FGI(FGI), 
 .CTRL_SGNLS(w_CTRL_SGNLS)
 );
 

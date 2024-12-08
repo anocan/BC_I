@@ -45,8 +45,6 @@ always@(*) begin
             RESULT[0] = E;
             CNTRL_E = {CO,~CO};
         end
-        3'b111: RESULT = RESULT; // NOP
-        default: RESULT = RESULT; // NOP
 	endcase
     Z = RESULT == 0;
     N = RESULT[WIDTH-1];
