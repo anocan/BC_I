@@ -17,10 +17,10 @@ def printRegisters(dut):
     #dut._log.info(f"D: {dut.controller.D.value}")
     #dut._log.info(f"OPSEL: {dut.data_path.OPSEL_ALU.value}")
     #dut._log.info(f"CNTRL: {dut.w_CTRL_SGNLS.value[4]}")
-    dut._log.info(f"E: {dut.data_path.e_ff.E.value}")
+    #dut._log.info(f"E: {dut.data_path.e_ff.E.value}")
     #dut._log.info(f"N: {dut.controller.N.value}")
     #dut._log.info(f"Z: {dut.controller.Z.value}")
-    dut._log.info(f"OVF: {dut.controller.OVF.value}")
+    #dut._log.info(f"OVF: {dut.controller.OVF.value}")
 
 
 @cocotb.test()
@@ -973,6 +973,52 @@ async def LDA_test(dut):
                 dut._log.info(f"Cycle count: {cycle} ----------\n")
                 assert dut.AC.value  == expected_result_indirect, f"Read value {dut.AC.value} does not match the expected value {expected_result_indirect}"
             ### ENDEXECUTE #2
+
+            case _:
+                dut._log.info(f"Cycle count: {cycle} ----------\n")
+    
+    dut._log.info("BC I test ended successfully!")
+
+@cocotb.test()
+async def STA_test(dut):
+    """Try accessing the design."""
+    # --- Test Setup ---
+    instruction_indirect = 0b1011000000000110  # STA with indirect addressing mode
+    target_address = 6  # Memory address to perform STA
+    memory_value = 0b0010101010101010  # Value in memory to STA with 
+    memory_value_2 = 0b1110100011101011
+    ac_value = 0b1011101011100010
+
+    # Direct addressing mode setup
+    dut.data_path.memory.MEMORY[target_address].value = memory_value  # Set memory value
+    dut.data_path.memory.MEMORY[1003].value = instruction_indirect  # Load instruction in memory
+    dut.data_path.memory.MEMORY[2730].value = memory_value_2  # Load instruction in memory
+    dut.data_path.AC.A.value = ac_value  # Set PC to instruction address
+    dut.data_path.PC.A.value = 1003  # Set PC to instruction address
+
+    #Start the clock
+    await cocotb.start(Clock(dut.clk, 10, 'us').start(start_high=False))
+    clkedge = FallingEdge(dut.clk)
+
+    for cycle in range(8):
+        await clkedge
+
+        #Logging the values if debugging
+        if DEBUG:
+            printRegisters(dut)
+            
+        match cycle:
+            case 0 | 1 | 2: ### FETCH
+                dut._log.info(f"Cycle count: {cycle} ----------\n")
+            ### ENDFETCH
+
+            case 4: ### EXECUTE STA
+                dut._log.info(f"Cycle count: {cycle} ----------\n")
+            
+            case 5: 
+                dut._log.info(f"Cycle count: {cycle} ----------\n")
+                assert dut.data_path.memory.MEMORY.value[2730] == ac_value, f"Read value {dut.data_path.memory.MEMORY.value[2730]} does not match the expected value {ac_value}"
+            ### ENDEXECUTE #1
 
             case _:
                 dut._log.info(f"Cycle count: {cycle} ----------\n")

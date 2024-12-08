@@ -140,6 +140,11 @@ always @(*) begin
                     INR_SC = 1'b1;
                     BUS_SEL = 3'b110;
                     CTRL_SGNLS[6] = 1'b1;                  
+                end
+                D[3]: begin // M[AR] <- AC, SC <- 0
+                    CLR_SC = 1'b1;
+                    BUS_SEL = 3'b011;
+                    CTRL_SGNLS[16] = 1'b1; 
                 end 
                 //default: 
             endcase

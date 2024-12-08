@@ -108,7 +108,7 @@ mux8to1 bus_mux(
 
 M memory(
 .clk(clk),
-.WE(WE_MEM),
+.WE(MEM_WE),
 .IN_ADF(w_AR),
 .W_DATA(BUS[WIDTH-1:0]),
 .R_DATA(w_MEM)

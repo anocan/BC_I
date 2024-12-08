@@ -83,6 +83,9 @@ testADD:
 testLDA:
 	$(MAKE) sim TOPLEVEL=$(TOPLEVEL) MODULE=$(MODULE) TESTCASE=LDA_test
 
+testSTA:
+	$(MAKE) sim TOPLEVEL=$(TOPLEVEL) MODULE=$(MODULE) TESTCASE=STA_test
+
 clear:
 	rm -rf sim_build results.xml *.vcd
 
