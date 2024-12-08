@@ -145,6 +145,11 @@ always @(*) begin
                     CLR_SC = 1'b1;
                     BUS_SEL = 3'b011;
                     CTRL_SGNLS[16] = 1'b1; 
+                end
+                D[4]: begin
+                    CLR_SC = 1'b1;
+                    BUS_SEL = 3'b000;
+                    CTRL_SGNLS[3] = 1'b1; 
                 end 
                 //default: 
             endcase

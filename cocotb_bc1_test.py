@@ -1024,3 +1024,46 @@ async def STA_test(dut):
                 dut._log.info(f"Cycle count: {cycle} ----------\n")
     
     dut._log.info("BC I test ended successfully!")
+
+@cocotb.test()
+async def BUN_test(dut):
+    """Try accessing the design."""
+    # --- Test Setup ---
+    instruction_indirect = 0b1100000000000110  # BUN with indirect addressing mode
+    target_address = 6  # Memory address to perform BUN
+    memory_value = 0b0010101010101010  # Value in memory to BUN with 
+    expected_pc = 0b101010101010
+
+    # Direct addressing mode setup
+    dut.data_path.memory.MEMORY[target_address].value = memory_value  # Set memory value
+    dut.data_path.memory.MEMORY[1003].value = instruction_indirect  # Load instruction in memory
+    dut.data_path.PC.A.value = 1003  # Set PC to instruction address
+
+    #Start the clock
+    await cocotb.start(Clock(dut.clk, 10, 'us').start(start_high=False))
+    clkedge = FallingEdge(dut.clk)
+
+    for cycle in range(8):
+        await clkedge
+
+        #Logging the values if debugging
+        if DEBUG:
+            printRegisters(dut)
+            
+        match cycle:
+            case 0 | 1 | 2: ### FETCH
+                dut._log.info(f"Cycle count: {cycle} ----------\n")
+            ### ENDFETCH
+
+            case 4: ### EXECUTE STA
+                dut._log.info(f"Cycle count: {cycle} ----------\n")
+            
+            case 5: 
+                dut._log.info(f"Cycle count: {cycle} ----------\n")
+                assert dut.PC.value == expected_pc, f"Read value {dut.PC.value} does not match the expected value {expected_pc}"
+            ### ENDEXECUTE #1
+
+            case _:
+                dut._log.info(f"Cycle count: {cycle} ----------\n")
+    
+    dut._log.info("BC I test ended successfully!")
