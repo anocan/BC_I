@@ -89,6 +89,9 @@ testSTA:
 testBUN:
 	$(MAKE) sim TOPLEVEL=$(TOPLEVEL) MODULE=$(MODULE) TESTCASE=BUN_test
 
+testBSA:
+	$(MAKE) sim TOPLEVEL=$(TOPLEVEL) MODULE=$(MODULE) TESTCASE=BSA_test
+
 clear:
 	rm -rf sim_build results.xml *.vcd
 

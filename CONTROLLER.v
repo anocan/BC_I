@@ -141,15 +141,21 @@ always @(*) begin
                     BUS_SEL = 3'b110;
                     CTRL_SGNLS[6] = 1'b1;                  
                 end
-                D[3]: begin // M[AR] <- AC, SC <- 0
+                D[3]: begin // STA: M[AR] <- AC, SC <- 0
                     CLR_SC = 1'b1;
                     BUS_SEL = 3'b011;
                     CTRL_SGNLS[16] = 1'b1; 
                 end
-                D[4]: begin
+                D[4]: begin // BUN: PC <- AR, SC <- 0
                     CLR_SC = 1'b1;
                     BUS_SEL = 3'b000;
                     CTRL_SGNLS[3] = 1'b1; 
+                end
+                D[5]: begin // BSA: M[AR] <- PC, AR <- AR + 1
+                    INR_SC = 1'b1;
+                    BUS_SEL = 3'b001;
+                    CTRL_SGNLS[1] = 1'b1;
+                    CTRL_SGNLS[16] = 1'b1;
                 end 
                 //default: 
             endcase
@@ -170,6 +176,11 @@ always @(*) begin
                     CLR_SC = 1'b1;
                     CTRL_SGNLS[9] = 1'b1;
                     CTRL_SGNLS[20] = 3'b010;
+                end
+                D[5]: begin // BSA: PC <- AR, SC <- 0
+                    CLR_SC = 1'b1;
+                    BUS_SEL = 3'b000;
+                    CTRL_SGNLS[3] = 1'b1;
                 end
                 //default: 
             endcase            

@@ -1067,3 +1067,51 @@ async def BUN_test(dut):
                 dut._log.info(f"Cycle count: {cycle} ----------\n")
     
     dut._log.info("BC I test ended successfully!")
+
+@cocotb.test()
+async def BSA_test(dut):
+    """Try accessing the design."""
+    # --- Test Setup ---
+    instruction_indirect = 0b1101000000000110  # BSA with indirect addressing mode
+    target_address = 6  # Memory address to perform BSA
+    memory_value = 0b0010101010101010  # Value in memory to BSA with 
+    pc = 0b001101010011
+    effective_address = 0b101010101010
+
+    # Direct addressing mode setup
+    dut.data_path.memory.MEMORY[target_address].value = memory_value  # Set memory value
+    dut.data_path.memory.MEMORY[pc].value = instruction_indirect  # Load instruction in memory
+    dut.data_path.PC.A.value = pc  # Set PC to instruction address
+
+    #Start the clock
+    await cocotb.start(Clock(dut.clk, 10, 'us').start(start_high=False))
+    clkedge = FallingEdge(dut.clk)
+
+    for cycle in range(9):
+        await clkedge
+
+        #Logging the values if debugging
+        if DEBUG:
+            printRegisters(dut)
+            
+        match cycle:
+            case 0 | 1 | 2: ### FETCH
+                dut._log.info(f"Cycle count: {cycle} ----------\n")
+            ### ENDFETCH
+
+            case 4: ### EXECUTE BSA
+                dut._log.info(f"Cycle count: {cycle} ----------\n")
+            
+            case 5: 
+                dut._log.info(f"Cycle count: {cycle} ----------\n")
+                assert dut.data_path.memory.MEMORY.value[effective_address] == pc+1, f"Read value {dut.data_path.memory.MEMORY.value[effective_address]} does not match the expected value {pc+1}"
+                assert dut.AR.value == effective_address + 1
+            
+            case 6:
+                dut._log.info(f"Cycle count: {cycle} ----------\n")
+                assert dut.PC.value == effective_address + 1, f"Read value {dut.PC.value} does not match the expected value {effective_address + 1}"              
+            ### ENDEXECUTE #1
+            case _:
+                dut._log.info(f"Cycle count: {cycle} ----------\n")
+    
+    dut._log.info("BC I test ended successfully!")
