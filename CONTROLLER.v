@@ -156,6 +156,11 @@ always @(*) begin
                     BUS_SEL = 3'b001;
                     CTRL_SGNLS[1] = 1'b1;
                     CTRL_SGNLS[16] = 1'b1;
+                end
+                D[6]: begin // ISZ: DR <- M[AR]
+                    INR_SC = 1'b1;
+                    BUS_SEL = 3'b110;
+                    CTRL_SGNLS[6] = 1'b1;                 
                 end 
                 //default: 
             endcase
@@ -182,8 +187,24 @@ always @(*) begin
                     BUS_SEL = 3'b000;
                     CTRL_SGNLS[3] = 1'b1;
                 end
+                D[6]: begin // ISZ: DR <- DR + 1
+                    INR_SC = 1'b1;
+                    CTRL_SGNLS[7] = 1'b1;
+                end
                 //default: 
             endcase            
+        end
+        T[6]: begin
+            case (1'b1)
+                D[6]: begin // ISZ: M[AR] <- DR, if (DR==0): PC <- PC + 1, SC <- 0
+                    CLR_SC = 1'b1;
+                    BUS_SEL = 3'b010;
+                    CTRL_SGNLS[16] = 1'b1;
+                    CTRL_SGNLS[20] = 3'b010;
+                    if (Z) CTRL_SGNLS[4] = 1'b1;
+                end 
+                //default: 
+            endcase
         end
 
         //default: 

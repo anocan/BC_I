@@ -1115,3 +1115,60 @@ async def BSA_test(dut):
                 dut._log.info(f"Cycle count: {cycle} ----------\n")
     
     dut._log.info("BC I test ended successfully!")
+
+@cocotb.test()
+async def ISZ_test(dut):
+    """Try accessing the design."""
+    # --- Test Setup ---
+    instruction_indirect = 0b1110000000000110  # ISZ with indirect addressing mode
+    target_address = 6  # Memory address to perform ISZ
+    memory_value = 0b0010101010101010  # Value in memory to ISZ with 
+    memory_value_2 = 0b1111111111111111
+    pc = 0b001101010011
+    effective_address = 0b101010101010
+
+    # Direct addressing mode setup
+    dut.data_path.memory.MEMORY[target_address].value = memory_value  # Set memory value
+    dut.data_path.memory.MEMORY[effective_address].value = memory_value_2  # Set memory value
+    dut.data_path.memory.MEMORY[pc].value = instruction_indirect  # Load instruction in memory
+    dut.data_path.PC.A.value = pc  # Set PC to instruction address
+
+    #Start the clock
+    await cocotb.start(Clock(dut.clk, 10, 'us').start(start_high=False))
+    clkedge = FallingEdge(dut.clk)
+
+    for cycle in range(9):
+        await clkedge
+
+        #Logging the values if debugging
+        if DEBUG:
+            printRegisters(dut)
+            
+        match cycle:
+            case 0 | 1 | 2: ### FETCH
+                dut._log.info(f"Cycle count: {cycle} ----------\n")
+            ### ENDFETCH
+
+            case 4: ### EXECUTE ISZ
+                dut._log.info(f"Cycle count: {cycle} ----------\n")
+            
+            case 5: 
+                dut._log.info(f"Cycle count: {cycle} ----------\n")
+                prev_dr_value = dut.DR.value
+                assert dut.DR.value == dut.data_path.memory.MEMORY.value[effective_address], f"Read value {dut.DR.value} does not match the expected value {dut.data_path.memory.MEMORY.value[effective_address]}"
+            
+            case 6:
+                dut._log.info(f"Cycle count: {cycle} ----------\n")
+                first_sixteen_bits_of_dr_value = (prev_dr_value + 1) & 0b01111111111111111
+                assert dut.DR.value == first_sixteen_bits_of_dr_value, f"Read value {dut.DR.value} does not match the expected value {first_sixteen_bits_of_dr_value}"      
+
+            case 7:
+                dut._log.info(f"Cycle count: {cycle} ----------\n")
+                assert dut.data_path.memory.MEMORY.value[effective_address] == dut.DR.value, f"Read value {dut.data_path.memory.MEMORY.value[effective_address]} does not match the expected value {dut.DR.value}"
+                if (dut.DR.value == 0): pc = pc + 1
+                assert dut.PC.value == pc + 1, f"Read value {dut.PC.value} does not match the expected value {pc + 1}"                    
+            ### ENDEXECUTE #1
+            case _:
+                dut._log.info(f"Cycle count: {cycle} ----------\n")
+    
+    dut._log.info("BC I test ended successfully!")

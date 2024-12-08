@@ -1,6 +1,6 @@
 <testsuites name="results">
   <testsuite name="all" package="all">
-    <property name="random_seed" value="1733660204" />
-    <testcase name="BSA_test" classname="cocotb_bc1_test" file="/Users/anilbudak/VSCode/445/HW1/cocotb_bc1_test.py" lineno="1071" time="0.09287905693054199" sim_time_ns="80000.001" ratio_time="861335.199170106" />
+    <property name="random_seed" value="1733662091" />
+    <testcase name="ISZ_test" classname="cocotb_bc1_test" file="/Users/anilbudak/VSCode/445/HW1/cocotb_bc1_test.py" lineno="1119" time="0.0957489013671875" sim_time_ns="80000.001" ratio_time="835518.7355435857" />
   </testsuite>
 </testsuites>
