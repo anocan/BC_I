@@ -24,17 +24,6 @@ TOPLEVEL = BC_I #BC_I
 MODULE = cocotb_bc1_test
 
 #TESTCASE = basic_computer_test
-test1:
-	$(MAKE) sim TOPLEVEL=$(TOPLEVEL) MODULE=$(MODULE) TESTCASE=basic_computer_test
-
-test2:
-	$(MAKE) sim TOPLEVEL=$(TOPLEVEL) MODULE=$(MODULE) TESTCASE=alu_test
-
-test3:
-	$(MAKE) sim TOPLEVEL=$(TOPLEVEL) MODULE=$(MODULE) TESTCASE=data_path_test
-
-test4:
-	$(MAKE) sim TOPLEVEL=$(TOPLEVEL) MODULE=$(MODULE) TESTCASE=controller_test
 
 # Register Reference Instructions
 testCLA:
@@ -98,6 +87,10 @@ testISZ:
 # Interrupt Test
 testR:
 	$(MAKE) sim TOPLEVEL=$(TOPLEVEL) MODULE=$(MODULE) TESTCASE=R_test
+
+# Final Test Case
+testFinal:
+	$(MAKE) sim TOPLEVEL=$(TOPLEVEL) MODULE=$(MODULE) TESTCASE=FINAL_test
 
 clear:
 	rm -rf sim_build results.xml *.vcd

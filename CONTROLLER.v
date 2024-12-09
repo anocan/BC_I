@@ -47,7 +47,7 @@ always @(posedge clk) begin
     if (CLR_IEN)
         IEN <= 1'b0;  
     else if (LD_IEN)
-        IEN <= IEN + 1'b1;
+        IEN <= 1'b1;
 end
 
 // COMBINATONAL CONTROL LOGICS

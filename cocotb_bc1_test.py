@@ -1275,3 +1275,248 @@ async def R_test(dut):
                 dut._log.info(f"Cycle count: {cycle} ----------\n")
     
     dut._log.info("BC I test ended successfully!")
+
+@cocotb.test()
+async def FINAL_test(dut):
+    # --- Test Setup --- #
+    PC = 0x100
+    dut.FGI.value = 0
+    
+    dut.data_path.memory.MEMORY[0x0001].value = 0x0050
+    dut.data_path.memory.MEMORY[0x0002].value = 0xC000
+
+    dut.data_path.memory.MEMORY[0x0030].value = 0xAAA9
+    dut.data_path.memory.MEMORY[0x0050].value = 0xA030
+    dut.data_path.memory.MEMORY[0x0060].value = 0x0FFF
+
+    dut.data_path.memory.MEMORY[0x0ADD].value = 0xAAA9
+    dut.data_path.memory.MEMORY[0x0AFF].value = 0xABCD
+    dut.data_path.memory.MEMORY[0x0FFF].value = 0xAAAA
+
+    dut.data_path.memory.MEMORY[PC].value   = 0xA050 #LDA
+    dut.data_path.memory.MEMORY[PC+1].value = 0x7200 #CMA
+    dut.data_path.memory.MEMORY[PC+2].value = 0x1ADD #ADD
+    dut.data_path.memory.MEMORY[PC+3].value = 0x7020 #INC
+    dut.data_path.memory.MEMORY[PC+4].value = 0x7004 #SZA
+    dut.data_path.memory.MEMORY[PC+5].value = 0x5100 #BSA
+    dut.data_path.memory.MEMORY[PC+6].value = 0x4111 #BUN
+    # INTERRUPT #1 
+    dut.data_path.memory.MEMORY[0x111].value = 0xF080 #ION
+    dut.data_path.memory.MEMORY[0x112].value = 0xBFFF #STA
+    # INTERRUPT #2
+    dut.data_path.memory.MEMORY[0x113].value = 0x7001 #HLT
+
+    dut.data_path.PC.A.value = PC
+
+    #Start the clock
+    await cocotb.start(Clock(dut.clk, 10, 'us').start(start_high=False))
+    clkedge = FallingEdge(dut.clk)
+
+    for cycle in range(70):
+        await clkedge
+
+        if DEBUG:
+            printRegisters(dut)
+            
+        match cycle:
+            case 0: ### FETCH LDA
+                dut._log.info(f"Cycle count: {cycle} ----------\n")
+            case 1:
+                dut._log.info(f"Cycle count: {cycle} ----------\n")
+                assert dut.PC.value == PC, f"Read value {dut.PC.value} does not match the expected value {PC}"
+            case 2:
+                dut._log.info(f"Cycle count: {cycle} ----------\n")
+                assert dut.IR.value == dut.data_path.memory.MEMORY[PC].value, f"Read value {dut.IR.value} does not match the expected value {dut.data_path.memory.MEMORY[PC].value}"
+                assert dut.PC.value == PC+1, f"Read value {dut.PC.value} does not match the expected value {PC+1}"
+            case 3:
+                dut._log.info(f"Cycle count: {cycle} ----------\n")
+                assert dut.AR.value == dut.IR.value & 0b0000_1111_1111_1111, f"Read value {dut.AR.value} does not match the expected value {0b0000_1111_1111_1111}"
+            ### ENDFETCH
+
+            case 4: ### INDIRECT ADDRESSING
+                dut._log.info(f"Cycle count: {cycle} ----------\n")
+                assert dut.AR.value == 0x030, f"Read value {dut.AR.value} does not match the expected value {0x030}"
+            case 5: ### EXECUTE LDA
+                dut._log.info(f"Cycle count: {cycle} ----------\n")
+                assert dut.DR.value == 0xAAA9, f"Read value {dut.DR.value} does not match the expected value {0xAAA9}"
+            case 6: 
+                dut._log.info(f"Cycle count: {cycle} ----------\n")
+                assert dut.AC.value == dut.DR.value, f"Read value {dut.AR.value} does not match the expected value {dut.DR.value}"
+            ### ENDEXECUTE 
+
+            case 7:
+                dut._log.info(f"Cycle count: {cycle} ----------\n")
+                assert dut.PC.value == PC+1, f"Read value {dut.PC.value} does not match the expected value {PC+1}"
+            case 8:
+                dut._log.info(f"Cycle count: {cycle} ----------\n")
+                assert dut.IR.value == dut.data_path.memory.MEMORY[PC+1].value, f"Read value {dut.IR.value} does not match the expected value {dut.data_path.memory.MEMORY[PC+1].value}"
+                assert dut.PC.value == PC+2, f"Read value {dut.PC.value} does not match the expected value {PC+2}"
+            case 9:
+                dut._log.info(f"Cycle count: {cycle} ----------\n")
+                assert dut.AR.value == dut.IR.value & 0b0000_1111_1111_1111, f"Read value {dut.AR.value} does not match the expected value {0b0000_1111_1111_1111}"
+            ### ENDFETCH
+
+            case 10: ### EXECUTE CMA
+                dut._log.info(f"Cycle count: {cycle} ----------\n")
+                assert dut.AC.value == 0x5556, f"Read value {dut.AC.value} does not match the expected value {0x5556}"
+            ### ENDEXECUTE
+
+            case 11: ### FETCH LDA
+                dut._log.info(f"Cycle count: {cycle} ----------\n")
+                assert dut.PC.value == PC+2, f"Read value {dut.PC.value} does not match the expected value {PC+2}"
+            case 12:
+                dut._log.info(f"Cycle count: {cycle} ----------\n")
+                assert dut.IR.value == dut.data_path.memory.MEMORY[PC+2].value, f"Read value {dut.IR.value} does not match the expected value {dut.data_path.memory.MEMORY[PC+2].value}"
+                assert dut.PC.value == PC+3, f"Read value {dut.PC.value} does not match the expected value {PC+3}"
+            case 13:
+                dut._log.info(f"Cycle count: {cycle} ----------\n")
+                assert dut.AR.value == dut.IR.value & 0b0000_1111_1111_1111, f"Read value {dut.AR.value} does not match the expected value {0b0000_1111_1111_1111}"
+            ### ENDFETCH 
+
+            # From now on, Fetch and Decode cycles are not going to be checked as it is proven that it works from the previous test cases.
+
+            case 14: ### DIRECT ADDRESSING
+                dut._log.info(f"Cycle count: {cycle} ----------\n")
+                assert dut.AR.value == 0x0ADD, f"Read value {dut.AR.value} does not match the expected value {0x0ADD}"
+            case 15: ### EXECUTE ADD
+                dut._log.info(f"Cycle count: {cycle} ----------\n") 
+                assert dut.DR.value == 0xAAA9, f"Read value {dut.DR.value} does not match the expected value {0xAAA9}"
+            case 16: 
+                dut._log.info(f"Cycle count: {cycle} ----------\n")
+                assert dut.AC.value == 0xFFFF, f"Read value {dut.AC.value} does not match the expected value {0xFFFF}"
+            ### ENDEXECUTE
+
+            case 17 | 18 | 19:  ### FETCH INC
+                dut._log.info(f"Cycle count: {cycle} ----------\n")
+            ### ENDFETCH
+
+            case 20: ### EXECUTE INC
+                dut._log.info(f"Cycle count: {cycle} ----------\n")
+                assert dut.AC.value == 0x0000, f"Read value {dut.AC.value} does not match the expected value {0x0000}"
+            ### ENDEXECUTE
+
+            case 21 | 22 | 23:  ### FETCH SZA
+                dut.FGI.value = 1 # FGI = 1, BUT INTERRUPT SETS AFTER FETCH AND DECODE AND INTERRUPT HAPPENS AFTER EXECUTE OF THE CURRENT INSTRUCTIONS
+                dut._log.info(f"Cycle count: {cycle} ----------\n")
+                assert dut.controller.R.value == 0, f"Read value {dut.controller.R.value} does not match the expected value {0}"
+            ### ENDFETCH            
+
+            case 24: ### EXECUTE SZA
+                dut._log.info(f"Cycle count: {cycle} ----------\n")
+                assert dut.controller.R.value == 1, f"Read value {dut.controller.R.value} does not match the expected value {1}"
+                assert dut.PC.value == PC+6, f"Read value {dut.AC.value} does not match the expected value {PC+6}"
+            ### ENDEXECUTE
+
+            case 25:  ### INTERRUPT CYCLE
+                dut._log.info(f"Cycle count: {cycle} ----------\n")
+                assert dut.AR.value == 0x000, f"Read value {dut.AR.value} does not match the expected value {0x000}"
+                assert dut.data_path.TR.A.value == PC+6, f"Read value {dut.data_path.TR.A.value} does not match the expected value {PC+6}"
+            case 26:
+                dut._log.info(f"Cycle count: {cycle} ----------\n")
+                assert dut.PC.value == 0x000, f"Read value {dut.PC.value} does not match the expected value {0x000}"
+                assert dut.data_path.memory.MEMORY.value[dut.AR.value] == dut.data_path.TR.A.value, f"Read value {dut.data_path.memory.MEMORY.value[dut.AR.value]} does not match the expected value {dut.data_path.TR.A.value}"
+            case 27:
+                dut._log.info(f"Cycle count: {cycle} ----------\n")
+                assert dut.PC.value == 0x001, f"Read value {dut.PC.value} does not match the expected value {0x001}"
+                assert dut.controller.IEN.value == 0x000, f"Read value {dut.controller.IEN.value} does not match the expected value {0x000}"
+                assert dut.controller.R.value == 0x000, f"Read value {dut.controller.R.value} does not match the expected value {0x000}"
+            ### ENDINTERRUPT CYCLE
+        
+            case 28 | 29 | 30: # FETCH DECODE of INTERRUPT OPERATION #1
+                dut._log.info(f"Cycle count: {cycle} ----------\n")
+            case 31: # DIRECT ADDRESING OF INTERRUPT #1 AND
+                dut._log.info(f"Cycle count: {cycle} ----------\n")
+                prev_ac = dut.AC.value
+            case 32: #EXECUTE OF INTERRUPT #1 AND
+                dut._log.info(f"Cycle count: {cycle} ----------\n")
+                assert dut.DR.value == dut.data_path.memory.MEMORY.value[dut.AR.value], f"Read value {dut.DR.value} does not match the expected value {dut.data_path.memory.MEMORY.value[dut.AR.value]}"
+            case 33:
+                assert dut.AC.value == prev_ac & dut.data_path.memory.MEMORY.value[dut.AR.value], f"Read value {dut.AC.value} does not match the expected value {prev_ac & dut.data_path.memory.MEMORY.value[dut.AR.value]}"
+            ### ENDEXECUTE OF INTERRUPT #1 AND
+
+            case 34 | 35 | 36: # FETCH INDIRECT BUN
+                dut._log.info(f"Cycle count: {cycle} ----------\n")
+            ### ENDFETCH
+
+            case 37: # EXECUTE INDIRECT BUN
+                dut._log.info(f"Cycle count: {cycle} ----------\n")
+                assert dut.AR.value == PC+6, f"Read value {dut.AR.value} does not match the expected value {PC+6}"
+            #ENDEXECUTE 
+
+            # Note that BSA is skipped due to SZA operation
+
+            case 38 | 39 | 40: # FETCH BUN
+                dut.FGI.value = 0 # No interrupt
+                dut._log.info(f"Cycle count: {cycle} ----------\n")
+            #ENDFETCH
+
+            case 41 | 42: # DIRECT ADDRESING & EXECUTE BUN
+                dut._log.info(f"Cycle count: {cycle} ----------\n")
+            #ENDEXECUTE
+
+            case 43:
+                dut._log.info(f"Cycle count: {cycle} ----------\n")
+                assert dut.PC.value == dut.AR.value, f"Read value {dut.PC.value} does not match the expected value {dut.AR.value}"
+            
+            case 44 | 45 | 46: # FETCH 
+                dut._log.info(f"Cycle count: {cycle} ----------\n")
+            #ENDFETCH
+            case 47: # EXECUTE ION 
+                dut._log.info(f"Cycle count: {cycle} ----------\n")
+                assert dut.controller.IEN.value == 1, f"Read value {dut.controller.IEN.value} does not match the expected value {1}"
+            #ENDEXECUTE
+
+            case 48 | 49 | 50: # FETCH STA
+                dut._log.info(f"Cycle count: {cycle} ----------\n")
+                dut.FGI.value = 1 # INTERRUPT PENDING
+            #ENDFETCH
+            case 51: # GETTING THE EFFECTIVE ADDRESS 
+                dut._log.info(f"Cycle count: {cycle} ----------\n")
+            case 52: # EXECUTE STA
+                dut._log.info(f"Cycle count: {cycle} ----------\n")
+                assert dut.data_path.memory.MEMORY.value[dut.AR.value] == dut.AC.value, f"Read value {dut.data_path.memory.MEMORY.value[dut.AR.value]} does not match the expected value {dut.AC.value}"
+            #ENDEXECUTE
+            
+            case 53:  ### INTERRUPT CYCLE
+                dut._log.info(f"Cycle count: {cycle} ----------\n")
+                assert dut.AR.value == 0x000, f"Read value {dut.AR.value} does not match the expected value {0x000}"
+                assert dut.data_path.TR.A.value == 0x111 + 2, f"Read value {dut.data_path.TR.A.value} does not match the expected value {0x111 + 2}"
+            case 54:
+                dut._log.info(f"Cycle count: {cycle} ----------\n")
+                assert dut.PC.value == 0x000, f"Read value {dut.PC.value} does not match the expected value {0x000}"
+                assert dut.data_path.memory.MEMORY.value[dut.AR.value] == dut.data_path.TR.A.value, f"Read value {dut.data_path.memory.MEMORY.value[dut.AR.value]} does not match the expected value {dut.data_path.TR.A.value}"
+            case 55:
+                dut._log.info(f"Cycle count: {cycle} ----------\n")
+                assert dut.PC.value == 0x001, f"Read value {dut.PC.value} does not match the expected value {0x001}"
+                assert dut.controller.IEN.value == 0x000, f"Read value {dut.controller.IEN.value} does not match the expected value {0x000}"
+                assert dut.controller.R.value == 0x000, f"Read value {dut.controller.R.value} does not match the expected value {0x000}"
+            ### ENDINTERRUPT CYCLE
+        
+            case 56 | 57 | 58: # FETCH DECODE of INTERRUPT OPERATION #2
+                dut._log.info(f"Cycle count: {cycle} ----------\n")
+            case 59: # DIRECT ADDRESING OF INTERRUPT #2 AND
+                dut._log.info(f"Cycle count: {cycle} ----------\n")
+                prev_ac = dut.AC.value
+            case 60: #EXECUTE OF INTERRUPT #2 AND
+                dut._log.info(f"Cycle count: {cycle} ----------\n")
+                assert dut.DR.value == dut.data_path.memory.MEMORY.value[dut.AR.value], f"Read value {dut.DR.value} does not match the expected value {dut.data_path.memory.MEMORY.value[dut.AR.value]}"
+            case 61:
+                assert dut.AC.value == prev_ac & dut.data_path.memory.MEMORY.value[dut.AR.value], f"Read value {dut.AC.value} does not match the expected value {prev_ac & dut.data_path.memory.MEMORY.value[dut.AR.value]}"
+            ### ENDEXECUTE OF INTERRUPT #1 AND
+
+            case 62 | 63 | 64: ### FETCH HLT
+                dut._log.info(f"Cycle count: {cycle} ----------\n")
+                #assert dut.data_path.AC.A.value == ac_value, f"Read value {dut.data_path.AC.A.value} does not match the written AC value {ac_value}"
+            ### ENDFETCH
+
+            case 65: ### EXECUTE HLT
+                dut._log.info(f"Cycle count: {cycle} ----------\n")            
+            case 66: 
+                dut._log.info(f"Cycle count: {cycle} ----------\n")
+                assert dut.controller.T.value == 0b0000000000000001, f"Read value {dut.controller.T.value} does not match the T = T0 value {0b0000000000000001}"
+            ### ENDEXECUTE
+
+            case _:
+                dut._log.info(f"Cycle count: {cycle} ----------\n")
+    
+    dut._log.info("BC I test ended successfully!")

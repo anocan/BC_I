@@ -3,6 +3,7 @@ def foo(x):
     print(bitSize)
     return (x & ((1<<bitSize) - 1)) - (x & (1<<bitSize))
 
-print(bin(23))
+#print(bin(23))
+print(0x100 + 11)
 #print(foo(bin(23)))
 #print(foo(0b11111111111111111))
