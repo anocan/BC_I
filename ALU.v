@@ -12,6 +12,7 @@ module ALU #(
     output reg [1:0] CNTRL_E, // CNTRL_E==10 = LOAD_E, CNTRL_E==01 = RST_E, CNTRL_E==00,11 = NOP
     output reg [WIDTH-1:0] RESULT
 );
+// ANIL BUDAK - 2574812
 
 initial begin
     CO = 0;

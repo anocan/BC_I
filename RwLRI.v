@@ -8,7 +8,7 @@ module RwLRI #(
     input [WIDTH-1:0] DATA,  // Parallel load input
     output reg [WIDTH-1:0] A // Register output        
 );
-
+// ANIL BUDAK - 2574812
 initial begin
     A = 0;
 end

@@ -8,7 +8,7 @@ module M #(
     output reg [15:0] R_DATA    
 
 );
-
+// ANIL BUDAK - 2574812
 reg [15:0] MEMORY [0:4095];
 
 

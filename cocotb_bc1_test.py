@@ -3,6 +3,8 @@ from cocotb.triggers import Timer
 from cocotb.clock import Clock
 from cocotb.triggers import FallingEdge
 
+### ANIL BUDAK - 2574812
+
 #TRUE for printing signals
 DEBUG = True
 

@@ -6,6 +6,7 @@ module E_FF (
     input RST,    // E <- 0
     output reg E                 
 );
+// ANIL BUDAK - 2574812
 
 initial begin
     E = 0;

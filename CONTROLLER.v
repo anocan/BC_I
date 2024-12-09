@@ -10,6 +10,7 @@ module CONTROLLER #(
     output reg [2:0] CTRL_SGNLS [0:CTRL_LNGTH-1]
 );
 
+// ANIL BUDAK - 2574812
 reg INR_SC, CLR_SC, CLR_R, LD_IEN, CLR_IEN;
 
 reg [7:0] D;

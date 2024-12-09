@@ -15,6 +15,8 @@ VERILOG_SOURCES += $(PWD)/DATA_PATH.v
 VERILOG_SOURCES += $(PWD)/SC.v
 VERILOG_SOURCES += $(PWD)/CONTROLLER.v
 
+# ANIL BUDAK - 2574812
+
 # TOPLEVEL is the name of the toplevel module in your Verilog or VHDL file
 #Should be the name of the basic computer module for you
 TOPLEVEL = BC_I #BC_I

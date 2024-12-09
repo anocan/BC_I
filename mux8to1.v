@@ -6,6 +6,7 @@ module mux8to1 #(
 	  output reg [WIDTH-1:0] MUX_OUT
     );
 	 
+// ANIL BUDAK - 2574812
 always@(*) begin
 	case(SELECT)
 		3'b000: MUX_OUT = MUX_INPUT[0];

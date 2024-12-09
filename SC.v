@@ -6,7 +6,7 @@ module SC(
     output reg [15:0] T    
 );
 
-    
+// ANIL BUDAK - 2574812
 reg [3:0] SQ;  
     
 initial begin

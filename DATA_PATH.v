@@ -12,6 +12,7 @@ module DATA_PATH #(
     output [WIDTH-1:0] DR_OUT,
     output CO, Z, N, OVF, E_OUT
 );
+// ANIL BUDAK - 2574812
 
 wire [WIDTH-1:0] MUX_ARRAY [0:7]; // Array of 8 inputs, each 16-bit wide
 
@@ -99,7 +100,6 @@ assign MUX_ARRAY[5] = w_TR;          // Input 5: TR
 assign MUX_ARRAY[6] = w_MEM;         // Input 6: Memory Output
 assign MUX_ARRAY[7] = 16'b0;         // Input 7: Reserved (default 0)
 
-// Instantiate memory
 mux8to1 bus_mux(
 .MUX_INPUT(MUX_ARRAY),
 .SELECT(BUS_SEL), 
